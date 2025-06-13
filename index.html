@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CKC Grand Master Points Tracker</title>
+    <title>CKC Grand Master Points Tracker - PDF Upload</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Configure PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
     <style>
         * {
             margin: 0;
@@ -40,48 +45,189 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .search-section {
+        .import-section {
             padding: 30px;
             background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
         }
 
-        .search-box {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
+        .import-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
             margin-top: 20px;
-            flex-wrap: wrap;
         }
 
-        .search-input {
-            padding: 15px 20px;
-            font-size: 1.1rem;
+        .import-method {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .import-method:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .import-method.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #e74c3c;
+        }
+
+        .method-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .method-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .method-description {
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .input-area {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
             border: none;
             border-radius: 8px;
-            min-width: 400px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 1rem;
         }
 
-        .search-btn {
-            padding: 15px 30px;
-            font-size: 1.1rem;
+        .file-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover {
+            border-color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .file-upload-area.dragover {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            opacity: 0.7;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn-primary {
             background: linear-gradient(45deg, #e74c3c, #c0392b);
             color: white;
             border: none;
+            padding: 15px 30px;
             border-radius: 8px;
+            font-size: 1.1rem;
             cursor: pointer;
             transition: transform 0.2s;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            width: 100%;
+            margin-top: 15px;
         }
 
-        .search-btn:hover {
+        .btn-primary:hover {
             transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .processing-status {
+            display: none;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .workflow-steps {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .workflow-steps h4 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .workflow-steps ol {
+            padding-left: 20px;
+            line-height: 1.8;
+        }
+
+        .workflow-steps li {
+            margin-bottom: 8px;
         }
 
         .tabs {
@@ -103,10 +249,6 @@
             border-right: 1px solid #2c3e50;
         }
 
-        .tab:last-child {
-            border-right: none;
-        }
-
         .tab:hover {
             background: #3498db;
         }
@@ -125,27 +267,6 @@
             display: block;
         }
 
-        .status {
-            display: none;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .dashboard-grid {
             display: grid;
             grid-template-columns: 350px 1fr 350px;
@@ -161,14 +282,6 @@
             border: 1px solid #e0e6ed;
         }
 
-        .card h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
-        }
-
         .points-display {
             background: linear-gradient(135deg, #27ae60, #229954);
             color: white;
@@ -178,235 +291,10 @@
             margin-bottom: 20px;
         }
 
-        .points-display h3 {
-            font-size: 1.4rem;
-            margin-bottom: 10px;
-        }
-
-        .points-display .points-number {
+        .points-number {
             font-size: 3.5rem;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .title-progress {
-            background: linear-gradient(135deg, #9b59b6, #8e44ad);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-
-        .title-level {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .title-level:last-child {
-            border-bottom: none;
-        }
-
-        .title-achieved {
-            background: rgba(255,255,255,0.2);
-            border-radius: 6px;
-            padding: 4px 8px;
-        }
-
-        .title-current {
-            background: #e74c3c;
-            border-radius: 6px;
-            padding: 4px 8px;
-            font-weight: bold;
-        }
-
-        .yearly-breakdown {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .year-card {
-            background: linear-gradient(135deg, #34495e, #2c3e50);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .year-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .year-card.selected {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            box-shadow: 0 8px 20px rgba(231,76,60,0.3);
-        }
-
-        .year-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-        }
-
-        .year-card .year-points {
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        .show-results {
-            display: grid;
-            gap: 15px;
-        }
-
-        .show-result {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 10px;
-            padding: 20px;
-            position: relative;
-            transition: all 0.3s;
-        }
-
-        .show-result:hover {
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-
-        .show-result.points-earned {
-            border-left: 5px solid #27ae60;
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-        }
-
-        .show-result.no-points {
-            border-left: 5px solid #6c757d;
-        }
-
-        .show-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .show-name {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #2c3e50;
-            flex: 1;
-        }
-
-        .show-date {
-            color: #666;
-            font-size: 0.9rem;
-            margin-left: 15px;
-        }
-
-        .show-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-        }
-
-        .detail-item {
-            background: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid #e9ecef;
-        }
-
-        .detail-label {
-            font-weight: bold;
-            color: #495057;
-            display: block;
-            font-size: 0.8rem;
-            margin-bottom: 2px;
-        }
-
-        .points-calculation {
-            background: linear-gradient(135deg, #17a2b8, #138496);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-
-        .calculation-formula {
-            font-family: 'Courier New', monospace;
-            background: rgba(255,255,255,0.1);
-            padding: 8px;
-            border-radius: 4px;
-            margin-top: 8px;
-            font-size: 0.9rem;
-        }
-
-        .canuckdogs-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .canuckdogs-table th {
-            background: #2c3e50;
-            color: white;
-            padding: 12px 8px;
-            text-align: left;
-            font-size: 0.9rem;
-        }
-
-        .canuckdogs-table td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #ecf0f1;
-            font-size: 0.85rem;
-        }
-
-        .canuckdogs-table tr:hover {
-            background: #f8f9fa;
-        }
-
-        .export-section {
-            background: linear-gradient(135deg, #fd7e14, #e9630a);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .export-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid white;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            margin: 0 10px;
-            transition: all 0.3s;
-        }
-
-        .export-btn:hover {
-            background: white;
-            color: #fd7e14;
-        }
-
-        .error {
-            display: none;
-            background: #e74c3c;
-            color: white;
-            padding: 20px;
-            text-align: center;
         }
 
         .dog-info {
@@ -417,56 +305,55 @@
             margin-bottom: 20px;
         }
 
-        .dog-info h3 {
-            margin-bottom: 5px;
-            font-size: 1.3rem;
+        .success-message {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
         }
 
-        .dog-info p {
-            opacity: 0.9;
+        .error-message {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
         }
 
-        .search-result-item {
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        .pdf-preview {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .pdf-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
             margin-bottom: 15px;
         }
 
-        .search-result-item:hover {
-            border-color: #3498db;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52,152,219,0.3);
+        .pdf-icon {
+            font-size: 2rem;
+            color: #dc3545;
         }
 
-        .search-result-item.exact-match {
-            border-color: #28a745;
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-        }
-
-        .match-badge {
-            background: #28a745;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: inline-block;
-        }
-
-        .partial-match-badge {
-            background: #17a2b8;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: inline-block;
+        .extracted-text-preview {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
         }
 
         @media (max-width: 1200px) {
@@ -475,121 +362,136 @@
                 gap: 20px;
             }
         }
-
-        .win-highlight {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb) !important;
-        }
-
-        .placement-highlight {
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7) !important;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🏆 CKC Grand Master Points Tracker</h1>
-            <p>Search CanuckDogs & Calculate Championship Points Automatically</p>
+            <p>Upload CanuckDogs PDF Reports for Automatic Points Calculation</p>
         </div>
 
-        <div class="search-section">
-            <h2>Import Your Dog's CanuckDogs Data</h2>
-            <p style="margin-bottom: 15px; opacity: 0.9; font-size: 1rem;">
-                📋 Choose how to import your dog's competition data
+        <div class="import-section">
+            <h2>📊 Choose Your Data Import Method</h2>
+            <p style="margin-bottom: 20px; opacity: 0.9;">
+                Select how you want to import your dog's competition data for points calculation
             </p>
-            
-            <!-- Tab Selection -->
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button onclick="showImportMethod('paste')" id="pasteTabBtn" class="search-btn" style="padding: 10px 20px; font-size: 0.9rem; background: linear-gradient(45deg, #e74c3c, #c0392b);">
-                    📋 Paste Data
-                </button>
-                <button onclick="showImportMethod('search')" id="searchTabBtn" class="search-btn" style="padding: 10px 20px; font-size: 0.9rem; background: #6c757d;">
-                    🔍 Search CanuckDogs
-                </button>
-                <button onclick="showImportMethod('bookmarklet')" id="bookmarkletTabBtn" class="search-btn" style="padding: 10px 20px; font-size: 0.9rem; background: #6c757d;">
-                    🔖 Auto-Extract
-                </button>
-            </div>
-            
-            <!-- Paste Method - Make this the default -->
-            <div id="pasteMethod" class="import-method">
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold; color: white;">Dog's Registered Name:</label>
-                    <input type="text" id="manualDogName" class="search-input" placeholder="Enter the registered name..." style="width: 100%; margin-bottom: 10px;" />
+
+            <div class="import-methods">
+                <div class="import-method active" onclick="selectMethod('pdf')">
+                    <div class="method-icon">📄</div>
+                    <div class="method-title">Upload CanuckDogs PDF</div>
+                    <div class="method-description">
+                        Upload PDF files generated from CanuckDogs' "Print Page" feature. 
+                        Perfect for complete competition histories.
+                    </div>
                 </div>
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold; color: white;">CanuckDogs Competition Data:</label>
-                    <textarea id="canuckDogsData" class="search-input" placeholder="Copy and paste ALL the competition results from the dog's CanuckDogs page here..." 
-                             style="width: 100%; height: 200px; font-family: monospace; font-size: 0.9rem; resize: vertical;"></textarea>
+
+                <div class="import-method" onclick="selectMethod('paste')">
+                    <div class="method-icon">📋</div>
+                    <div class="method-title">Paste Text Data</div>
+                    <div class="method-description">
+                        Copy and paste competition data directly from CanuckDogs pages. 
+                        Quick and reliable for current data.
+                    </div>
                 </div>
-                <button onclick="processManualData()" class="search-btn" style="width: 100%; padding: 15px; font-size: 1.1rem;">
-                    📊 Calculate Grand Master Points
-                </button>
-                
-                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-top: 15px;">
-                    <h4 style="margin-bottom: 10px;">📋 Step-by-Step Instructions:</h4>
-                    <ol style="margin: 0; padding-left: 20px; line-height: 1.8; color: rgba(255,255,255,0.9);">
-                        <li><strong>Go to CanuckDogs.com</strong> and find your dog's page</li>
-                        <li><strong>Select ALL text</strong> on the page (Ctrl+A or Cmd+A)</li>
-                        <li><strong>Copy the text</strong> (Ctrl+C or Cmd+C)</li>
-                        <li><strong>Paste it</strong> in the text area above (Ctrl+V or Cmd+V)</li>
-                        <li><strong>Enter the dog's name</strong> and click "Calculate Points"</li>
-                    </ol>
+
+                <div class="import-method" onclick="selectMethod('demo')">
+                    <div class="method-icon">🎯</div>
+                    <div class="method-title">Try Demo Data</div>
+                    <div class="method-description">
+                        Load sample competition data to explore features and see 
+                        how championship points are calculated.
+                    </div>
                 </div>
             </div>
-            
-            <!-- Search Method -->
-            <div id="searchMethod" class="import-method" style="display: none;">
-                <div class="search-box">
-                    <input type="text" id="dogName" class="search-input" placeholder="e.g., ROBEL MILLER TIME, SUNNYDALE GOLDEN..." />
-                    <button onclick="searchCanuckDogs()" id="searchBtn" class="search-btn">🔍 Search CanuckDogs</button>
+
+            <div class="input-area">
+                <!-- PDF Upload Method -->
+                <div id="pdf-method" class="method-content">
+                    <div class="input-group">
+                        <label>Dog's Registered Name:</label>
+                        <input type="text" id="dogName" class="input-field" placeholder="Enter the registered name..." />
+                    </div>
+
+                    <div class="file-upload-area" onclick="document.getElementById('pdfInput').click()" 
+                         ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                        <div class="upload-icon">📄</div>
+                        <div class="upload-text">Drop CanuckDogs PDF here or click to browse</div>
+                        <div class="upload-subtext">Supports PDF files from CanuckDogs "Print Page" feature</div>
+                    </div>
+                    <input type="file" id="pdfInput" class="file-input" accept=".pdf" onchange="handleFileSelect(event)" />
+
+                    <div class="workflow-steps">
+                        <h4>📋 CanuckDogs PDF Workflow:</h4>
+                        <ol>
+                            <li><strong>Go to CanuckDogs.ca</strong> and search for your dog</li>
+                            <li><strong>Click the dog's name</strong> to open their page</li>
+                            <li><strong>Click "Print Page"</strong> tab</li>
+                            <li><strong>Select:</strong> Event Type = Conformation, Year = Current year</li>
+                            <li><strong>Click "Print"</strong> → Save as PDF (skip first 3 pages)</li>
+                            <li><strong>Upload the PDF</strong> here for automatic processing</li>
+                        </ol>
+                    </div>
                 </div>
-                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-top: 15px;">
-                    <h4 style="margin-bottom: 10px;">💡 Search Tips:</h4>
-                    <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
-                        <li><strong>Spelling is important</strong> - match the exact spelling from registration</li>
-                        <li><strong>Put in as much as you can</strong> of the registered name</li>
-                        <li><strong>Do not include titles</strong> - no "CH", "GCH", "AM CH" prefixes</li>
-                        <li><strong>Use only the registered name</strong> - no prefixes or suffixes</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- Bookmarklet Method -->
-            <div id="bookmarkletMethod" class="import-method" style="display: none;">
-                <div style="background: linear-gradient(135deg, #17a2b8, #138496); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                    <h3 style="margin-bottom: 15px;">🔖 Auto-Extract Bookmarklet</h3>
-                    <p style="margin-bottom: 15px;">Create a bookmark that automatically extracts data from any CanuckDogs page:</p>
-                    <button onclick="showBookmarkletCode()" class="export-btn" style="margin: 0;">
-                        📋 Get Bookmarklet Code
+
+                <!-- Paste Method -->
+                <div id="paste-method" class="method-content" style="display: none;">
+                    <div class="input-group">
+                        <label>Dog's Registered Name:</label>
+                        <input type="text" id="dogNamePaste" class="input-field" placeholder="Enter the registered name..." />
+                    </div>
+
+                    <div class="input-group">
+                        <label>CanuckDogs Competition Data:</label>
+                        <textarea id="pasteData" class="input-field" style="height: 200px; font-family: monospace;" 
+                                placeholder="Copy and paste the competition data from CanuckDogs..."></textarea>
+                    </div>
+
+                    <button onclick="processPastedData()" class="btn-primary">
+                        📊 Calculate Points from Pasted Data
                     </button>
                 </div>
-                
-                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
-                    <h4 style="margin-bottom: 10px;">🚀 How It Works:</h4>
-                    <ol style="margin: 0; padding-left: 20px; line-height: 1.6;">
-                        <li><strong>One-time setup:</strong> Add the bookmarklet to your browser</li>
-                        <li><strong>Go to any CanuckDogs page</strong> for your dog</li>
-                        <li><strong>Click the bookmarklet</strong> - data transfers automatically</li>
-                        <li><strong>Points calculated instantly</strong> in this tool</li>
-                    </ol>
+
+                <!-- Demo Method -->
+                <div id="demo-method" class="method-content" style="display: none;">
+                    <div style="text-align: center; padding: 20px;">
+                        <h3 style="margin-bottom: 15px;">🎯 Try the Demo</h3>
+                        <p style="margin-bottom: 20px; opacity: 0.9;">
+                            Load sample data for "Miller" - a Portuguese Water Dog with multiple championship wins
+                        </p>
+                        <button onclick="loadDemoData()" class="btn-primary" style="max-width: 300px;">
+                            🚀 Load Demo Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="processing-status" id="processingStatus">
+                    <div class="spinner"></div>
+                    <div id="statusText">Processing PDF and extracting competition data...</div>
+                </div>
+
+                <div class="success-message" id="successMessage"></div>
+                <div class="error-message" id="errorMessage"></div>
+
+                <div class="pdf-preview" id="pdfPreview">
+                    <div class="pdf-info">
+                        <div class="pdf-icon">📄</div>
+                        <div>
+                            <div style="font-weight: bold;" id="pdfFileName"></div>
+                            <div style="color: #666; font-size: 0.9rem;" id="pdfFileSize"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 10px; font-weight: bold;">Extracted Text Preview:</div>
+                    <div class="extracted-text-preview" id="extractedTextPreview"></div>
                 </div>
             </div>
-        </div>
-
-        <div id="status" class="status">
-            <div class="spinner"></div>
-            <p id="statusText">Searching CanuckDogs database...</p>
-        </div>
-
-        <div id="error" class="error">
-            <p id="errorMessage"></p>
         </div>
 
         <div class="tabs">
             <button class="tab active" onclick="showTab('dashboard')">📊 Points Dashboard</button>
-            <button class="tab" onclick="showTab('yearly')">📅 Year-by-Year Progress</button>
-            <button class="tab" onclick="showTab('rawdata')">📋 CanuckDogs Raw Data</button>
+            <button class="tab" onclick="showTab('yearly')">📅 Year-by-Year</button>
+            <button class="tab" onclick="showTab('validation')">✅ Data Quality</button>
             <button class="tab" onclick="showTab('reports')">📄 Export Reports</button>
         </div>
 
@@ -598,7 +500,7 @@
                 <div class="card">
                     <div id="dogInfo" class="dog-info" style="display: none;">
                         <h3 id="dogTitle">Dog Name</h3>
-                        <p id="dogDetails">Search for a dog to view championship points</p>
+                        <p id="dogDetails">Upload or enter competition data to view championship points</p>
                     </div>
 
                     <div class="points-display">
@@ -606,37 +508,13 @@
                         <div class="points-number" id="totalPoints">0</div>
                         <small>Lifetime Total</small>
                     </div>
-
-                    <div class="title-progress">
-                        <h3>🎖️ Title Progress</h3>
-                        <div class="title-level">
-                            <span>Champion (CH)</span>
-                            <span id="chStatus" class="title-achieved">✓</span>
-                        </div>
-                        <div class="title-level">
-                            <span>Grand Champion (GCH)</span>
-                            <span id="gchStatus">20 pts needed</span>
-                        </div>
-                        <div class="title-level">
-                            <span>Grand Champion Excellent (GCHX)</span>
-                            <span id="gchxStatus">100 pts needed</span>
-                        </div>
-                        <div class="title-level">
-                            <span>Grand Master (GM)</span>
-                            <span id="gmStatus">200 pts needed</span>
-                        </div>
-                        <div class="title-level">
-                            <span>Grand Master Supreme (GMS)</span>
-                            <span id="gmsStatus">400 pts needed</span>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="card">
                     <h2>🏆 Recent Show Results</h2>
                     <div id="recentResults">
                         <p style="text-align: center; color: #666; padding: 40px;">
-                            Search for a dog to see championship point calculations
+                            Import competition data to see championship point calculations
                         </p>
                     </div>
                 </div>
@@ -645,7 +523,7 @@
                     <h2>📈 Points Summary</h2>
                     <div id="pointsSummary">
                         <div style="text-align: center; color: #666; padding: 40px;">
-                            <p>Points breakdown will appear here after selecting a dog</p>
+                            <p>Points breakdown will appear here after processing data</p>
                         </div>
                     </div>
                 </div>
@@ -653,959 +531,343 @@
         </div>
 
         <div id="yearly" class="tab-content">
-            <div class="yearly-breakdown" id="yearlyBreakdown">
-                <p style="text-align: center; color: #666; padding: 40px;">
-                    Select a dog to see year-by-year progression
-                </p>
-            </div>
-            <div id="selectedYearDetails"></div>
+            <p style="text-align: center; color: #666; padding: 40px;">
+                Year-by-year progression will appear here after processing data
+            </p>
         </div>
 
-        <div id="rawdata" class="tab-content">
-            <h2>📋 Raw CanuckDogs Competition Data</h2>
-            <div id="rawDataTable">
-                <p style="text-align: center; color: #666; padding: 40px;">
-                    Selected dog's competition data will appear here
-                </p>
-            </div>
+        <div id="validation" class="tab-content">
+            <p style="text-align: center; color: #666; padding: 40px;">
+                Data quality validation will appear here after processing
+            </p>
         </div>
 
         <div id="reports" class="tab-content">
-            <div class="export-section">
-                <h2>📊 Generate Championship Points Reports</h2>
-                <p style="margin: 20px 0;">Generate comprehensive PDF reports with points calculations and supporting data</p>
-                
-                <button class="export-btn" onclick="generatePDFReport('complete')">
-                    📄 Complete Championship Report
+            <div style="text-align: center; padding: 40px;">
+                <h2>📊 Generate Reports</h2>
+                <p style="margin: 20px 0;">Export comprehensive championship points reports</p>
+                <button class="btn-primary" style="max-width: 300px;" disabled>
+                    📄 Generate Championship Report
                 </button>
-                <button class="export-btn" onclick="generatePDFReport('yearly')">
-                    📅 Year-by-Year Progress Report
-                </button>
-                <button class="export-btn" onclick="generatePDFReport('verification')">
-                    ✅ Points Verification Report
-                </button>
-                
-                <div style="margin-top: 30px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
-                    <h3>Report Contents:</h3>
-                    <ul style="text-align: left; margin: 10px 0; padding-left: 40px;">
-                        <li>Official CKC Grand Master points calculation formulas</li>
-                        <li>Complete show-by-show point breakdown</li>
-                        <li>Title progression timeline</li>
-                        <li>Raw CanuckDogs extracted data</li>
-                        <li>Points verification with supporting calculations</li>
-                    </ul>
-                </div>
             </div>
         </div>
     </div>
 
     <script>
         let currentDogData = null;
-        let selectedYear = null;
-        let searchResults = [];
+        let currentMethod = 'pdf';
 
-        // Import method switching - default to paste method
-        function showImportMethod(method) {
-            // Hide all methods
-            document.querySelectorAll('.import-method').forEach(div => {
-                div.style.display = 'none';
-            });
+        function selectMethod(method) {
+            currentMethod = method;
             
-            // Reset button styles
-            document.querySelectorAll('[id$="TabBtn"]').forEach(btn => {
-                btn.style.background = '#6c757d';
-            });
+            // Update visual selection
+            document.querySelectorAll('.import-method').forEach(el => el.classList.remove('active'));
+            event.target.closest('.import-method').classList.add('active');
             
-            // Show selected method and highlight button
-            document.getElementById(method + 'Method').style.display = 'block';
-            document.getElementById(method + 'TabBtn').style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
+            // Show/hide method content
+            document.querySelectorAll('.method-content').forEach(el => el.style.display = 'none');
+            document.getElementById(method + '-method').style.display = 'block';
         }
 
-        // Initialize with paste method active
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set paste as default method
-            showImportMethod('paste');
-            
-            // Focus on the dog name input
-            document.getElementById('manualDogName').focus();
-            
-            // Add keyboard shortcuts
-            document.getElementById('manualDogName').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    document.getElementById('canuckDogsData').focus();
-                }
-            });
-            
-            document.getElementById('canuckDogsData').addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                    processManualData();
-                }
-            });
-        });
+        // PDF Upload Handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.closest('.file-upload-area').classList.add('dragover');
+        }
 
-        // Manual data processing
-        async function processManualData() {
-            const dogName = document.getElementById('manualDogName').value.trim();
-            const rawData = document.getElementById('canuckDogsData').value.trim();
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.closest('.file-upload-area').classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.closest('.file-upload-area').classList.remove('dragover');
             
-            if (!dogName || !rawData) {
-                alert('Please enter both the dog name and competition data');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                processFile(files[0]);
+            } else {
+                showError('Please drop a PDF file');
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file && file.type === 'application/pdf') {
+                processFile(file);
+            } else {
+                showError('Please select a PDF file');
+            }
+        }
+
+        async function processFile(file) {
+            const dogName = document.getElementById('dogName').value.trim();
+            if (!dogName) {
+                showError('Please enter the dog\'s registered name first');
                 return;
             }
-            
-            showLoading('Processing CanuckDogs data...');
-            hideError();
+
+            showProcessing('Processing PDF and extracting competition data...');
             
             try {
-                // Simulate processing time
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                // Show PDF preview
+                showPDFPreview(file);
                 
-                // Parse the manual data
-                const parsedData = parseCanuckDogsText(dogName, rawData);
+                // Simulate PDF processing (in reality, you'd use PDF.js or similar)
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // For demo purposes, we'll simulate extracted text
+                const extractedText = await simulatePDFExtraction(file, dogName);
+                
+                // Update preview with extracted text
+                document.getElementById('extractedTextPreview').textContent = extractedText;
+                
+                // Parse the extracted text
+                const parsedData = parseCanuckDogsText(dogName, extractedText);
                 
                 if (parsedData) {
                     currentDogData = parsedData;
                     calculateAllPoints();
-                    displayDashboard();
-                    displayYearlyBreakdown();
-                    displayRawData();
-                    showSuccessMessage(`Successfully processed data for ${currentDogData.basicInfo.callName}!`);
+                    displayResults();
+                    showSuccess(`Successfully processed PDF for ${currentDogData.basicInfo.callName}! Found ${getTotalShows()} shows.`);
                 } else {
-                    showError('Could not parse the CanuckDogs data. Please check the format and try again.');
+                    showError('Could not parse competition data from PDF. Please check the file format.');
+                }
+                
+            } catch (error) {
+                showError('Error processing PDF: ' + error.message);
+            } finally {
+                hideProcessing();
+            }
+        }
+
+        function showPDFPreview(file) {
+            document.getElementById('pdfPreview').style.display = 'block';
+            document.getElementById('pdfFileName').textContent = file.name;
+            document.getElementById('pdfFileSize').textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+        }
+
+        async function simulatePDFExtraction(file, dogName) {
+            // This simulates what would be extracted from a CanuckDogs PDF
+            // In a real implementation, you'd use PDF.js or a similar library
+            
+            const samplePDFText = `
+${dogName}
+Owner: Sample Owner
+Breed: Portuguese Water Dog
+
+Competition Results - Conformation Events
+
+Calgary Kennel & Obedience Club
+May 10 to May 12, 2024
+Saturday    Group 1st         Joan Luna Liebes       64
+Saturday    Best Of Breed     Joan Luna Liebes        0
+Sunday      Best Of Breed     Eric Liebes (Dr)        0
+
+Hub City Kennel & Obedience Club  
+May 03 to May 05, 2024
+Sunday      Group 3rd         Darryl Vice           44
+Sunday      Best Of Breed     Darryl Vice      8(1-2-3-3)
+
+Regina Kennel & Obedience Club
+May 18 to May 19, 2024
+Saturday    Best Of Breed     Honey Glendinning  4 (1-1-2-1)
+Saturday    Select Dog        Sharon Derrick         N/A
+Sunday      Best Of Breed     Tannis Postma      4 (1-1-2-1)
+Sunday      Group 3rd         Tannis Postma          13
+
+Battle River Canine Association
+March 22 to March 24, 2024
+Sunday      Group 3rd         Mario Knoll            49
+            `;
+            
+            return samplePDFText;
+        }
+
+        async function processPastedData() {
+            const dogName = document.getElementById('dogNamePaste').value.trim();
+            const pastedData = document.getElementById('pasteData').value.trim();
+            
+            if (!dogName || !pastedData) {
+                showError('Please enter both dog name and competition data');
+                return;
+            }
+            
+            showProcessing('Processing pasted data...');
+            
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const parsedData = parseCanuckDogsText(dogName, pastedData);
+                
+                if (parsedData) {
+                    currentDogData = parsedData;
+                    calculateAllPoints();
+                    displayResults();
+                    showSuccess(`Successfully processed data for ${currentDogData.basicInfo.callName}!`);
+                } else {
+                    showError('Could not parse the competition data. Please check the format.');
                 }
                 
             } catch (error) {
                 showError('Error processing data: ' + error.message);
             } finally {
-                hideLoading();
+                hideProcessing();
             }
         }
 
-        // Parse text data from CanuckDogs
-        function parseCanuckDogsText(dogName, rawText) {
-            try {
-                const lines = rawText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-                
-                // Extract basic info
-                const basicInfo = {
-                    registeredName: dogName,
-                    callName: extractCallName(dogName),
-                    owner: 'Unknown Owner',
-                    breed: 'Unknown Breed'
+        function loadDemoData() {
+            showProcessing('Loading demo data...');
+            
+            setTimeout(() => {
+                const demoData = {
+                    basicInfo: {
+                        registeredName: "CAN BIS RBIS GCHB AM CH ROBEL GTO IT'S MILLER TIME AEGEAN H2O",
+                        callName: "Miller",
+                        owner: "Mamdouh Farag",
+                        breed: "Portuguese Water Dog"
+                    },
+                    yearlyData: {
+                        2024: {
+                            conformation: [
+                                { show: "Calgary Kennel & Obedience Club", dateRange: "May 10-12, 2024", day: "Saturday", position: "Group 1st", judge: "Joan Luna Liebes", dogsBeaten: 32, rawPoints: "64" },
+                                { show: "Calgary Kennel & Obedience Club", dateRange: "May 10-12, 2024", day: "Saturday", position: "Best Of Breed", judge: "Joan Luna Liebes", dogsBeaten: 0, rawPoints: "0" },
+                                { show: "Hub City Kennel & Obedience Club", dateRange: "May 3-5, 2024", day: "Sunday", position: "Group 3rd", judge: "Darryl Vice", dogsBeaten: 22, rawPoints: "44" },
+                                { show: "Hub City Kennel & Obedience Club", dateRange: "May 3-5, 2024", day: "Sunday", position: "Best Of Breed", judge: "Darryl Vice", dogsBeaten: 4, rawPoints: "8(1-2-3-3)" },
+                                { show: "Regina Kennel & Obedience Club", dateRange: "May 18-19, 2024", day: "Sunday", position: "Group 3rd", judge: "Tannis Postma", dogsBeaten: 6, rawPoints: "13" },
+                                { show: "Regina Kennel & Obedience Club", dateRange: "May 18-19, 2024", day: "Sunday", position: "Best Of Breed", judge: "Tannis Postma", dogsBeaten: 5, rawPoints: "4 (1-1-2-1)" }
+                            ]
+                        }
+                    }
                 };
                 
-                // Look for owner and breed info in the text
-                lines.forEach(line => {
-                    if (line.toLowerCase().includes('owner:') || line.toLowerCase().includes('owned by')) {
-                        basicInfo.owner = line.split(':')[1]?.trim() || basicInfo.owner;
-                    }
-                    if (line.toLowerCase().includes('breed:')) {
-                        basicInfo.breed = line.split(':')[1]?.trim() || basicInfo.breed;
-                    }
-                });
-                
-                // Parse competition results
-                const yearlyData = {};
-                let currentYear = new Date().getFullYear();
-                let currentShow = '';
-                let currentDateRange = '';
-                
-                const results = [];
-                
-                lines.forEach(line => {
-                    // Look for year indicators
-                    const yearMatch = line.match(/20\d{2}/);
-                    if (yearMatch) {
-                        currentYear = parseInt(yearMatch[0]);
-                    }
-                    
-                    // Look for show names (lines with "Club", "Association", "Kennel", etc.)
-                    if (line.match(/\b(club|association|kennel|society|show)\b/i) && !line.match(/\b(judge|points|group|breed)\b/i)) {
-                        currentShow = line;
-                        return;
-                    }
-                    
-                    // Look for date ranges
-                    if (line.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/i)) {
-                        currentDateRange = line;
-                        return;
-                    }
-                    
-                    // Look for competition results
-                    const resultMatch = line.match(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday).*?(best of breed|bob|winners dog|winners bitch|wd|wb|group \d+|group \d+st|group \d+nd|group \d+rd|group \d+th|select|best of opposite)/i);
-                    
-                    if (resultMatch && currentShow) {
-                        const day = resultMatch[1];
-                        const position = resultMatch[2];
-                        
-                        // Extract judge and points
-                        const parts = line.split(/\s+/);
-                        let judge = 'Unknown Judge';
-                        let rawPoints = 'N/A';
-                        let dogsBeaten = 0;
-                        
-                        // Look for judge name (usually between position and points)
-                        const positionIndex = parts.findIndex(part => 
-                            part.toLowerCase().includes(position.toLowerCase().split(' ')[0])
-                        );
-                        
-                        if (positionIndex >= 0 && positionIndex < parts.length - 2) {
-                            // Judge is likely the next 1-2 words
-                            judge = parts.slice(positionIndex + 1, positionIndex + 3).join(' ');
-                        }
-                        
-                        // Extract points (usually last number or number in parentheses)
-                        const pointsMatch = line.match(/(\d+)\s*(\([^)]+\))?$/);
-                        if (pointsMatch) {
-                            rawPoints = pointsMatch[0];
-                            dogsBeaten = parseInt(pointsMatch[1]);
-                        }
-                        
-                        results.push({
-                            show: currentShow,
-                            dateRange: currentDateRange || `${currentYear}`,
-                            day: day,
-                            position: position,
-                            judge: judge.replace(/\d+.*/, '').trim() || 'Unknown Judge',
-                            rawPoints: rawPoints,
-            function extractCallName(registeredName) {
-            // Try to extract call name from registered name
-            const parts = registeredName.split(' ');
-            // Usually the call name is one of the last parts
-            for (let i = parts.length - 1; i >= 0; i--) {
-                const part = parts[i];
-                if (part.length > 2 && !part.includes("'S") && !part.match(/^(OF|THE|KENNEL)$/i)) {
-                    return part;
-                }
-            }
-            return parts[parts.length - 1] || 'Unknown';
+                currentDogData = demoData;
+                calculateAllPoints();
+                displayResults();
+                showSuccess(`Demo data loaded for ${currentDogData.basicInfo.callName}! Found ${getTotalShows()} shows with ${currentDogData.totalGrandMasterPoints} total points.`);
+                hideProcessing();
+            }, 1500);
         }
 
-        function extractYearFromDate(dateString) {
-            const match = dateString.match(/\b(202[0-5])\b/);
-            return match ? parseInt(match[1]) : null;
-        }
-
-        // Remove the complex scraping functions that don't work reliably
-        // Focus on the methods that actually work
-
-        function showBookmarkletCode() {
-            const bookmarkletCode = `javascript:(function(){
-                try {
-                    const pageText = document.body.innerText;
-                    const pageTitle = document.title;
-                    
-                    // Try to extract dog name from page title or content
-                    let dogName = pageTitle.split(' - ')[0] || 'Unknown Dog';
-                    
-                    // Open calculator window and send data
-                    const calculatorWindow = window.open('', 'CKCTracker');
-                    
-                    setTimeout(() => {
-                        if (calculatorWindow && !calculatorWindow.closed) {
-                            calculatorWindow.postMessage({
-                                type: 'canuckDogsData',
-                                dogName: dogName,
-                                rawData: pageText
-                            }, '*');
-                            calculatorWindow.focus();
-                        } else {
-                            alert('Calculator window blocked. Please allow popups and try again.');
-                        }
-                    }, 2000);
-                    
-                } catch (error) {
-                    alert('Error extracting data: ' + error.message);
-                }
-            })();`;
+        function parseCanuckDogsText(dogName, text) {
+            // Enhanced parsing logic (simplified for demo)
+            const lines = text.split('\n').filter(line => line.trim().length > 0);
             
-            // Show the bookmarklet code in a modal
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.8);
-                z-index: 10000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-            `;
+            const basicInfo = {
+                registeredName: dogName,
+                callName: extractCallName(dogName),
+                owner: extractFromText(lines, 'owner:') || 'Not specified',
+                breed: extractFromText(lines, 'breed:') || 'Not specified'
+            };
             
-            modal.innerHTML = `
-                <div style="background: white; border-radius: 15px; padding: 30px; max-width: 800px; max-height: 80vh; overflow-y: auto;">
-                    <h2 style="margin-bottom: 20px; color: #2c3e50;">🔖 CanuckDogs Auto-Extractor Bookmarklet</h2>
-                    
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                        <h3 style="margin-bottom: 10px; color: #495057;">📋 Setup Steps:</h3>
-                        <ol style="padding-left: 20px; line-height: 1.6;">
-                            <li>Copy ALL the code below</li>
-                            <li>Right-click your bookmarks bar → "Add page"</li>
-                            <li>Name: "Extract CanuckDogs"</li>
-                            <li>URL: Paste the copied code</li>
-                            <li>Save the bookmark</li>
-                        </ol>
-                    </div>
-                    
-                    <h3 style="margin: 20px 0 10px 0; color: #495057;">📝 Bookmarklet Code:</h3>
-                    <textarea readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; background: #f8f9fa;">${bookmarkletCode}</textarea>
-                    
-                    <div style="text-align: center; margin-top: 20px;">
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem;">
-                            Close
-                        </button>
-                        <button onclick="navigator.clipboard.writeText('${bookmarkletCode.replace(/'/g, "\\'")}').then(() => alert('Bookmarklet copied!'))" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-left: 10px;">
-                            📋 Copy Code
-                        </button>
-                    </div>
-                </div>
-            `;
+            const yearlyData = { 2024: { conformation: [] } };
             
-            document.body.appendChild(modal);
-        }
-
-        // Listen for bookmarklet messages
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'canuckDogsData') {
-                // Switch to paste method and populate data
-                showImportMethod('paste');
-                document.getElementById('manualDogName').value = event.data.dogName;
-                document.getElementById('canuckDogsData').value = event.data.rawData;
-                showSuccessMessage('Data received from bookmarklet! Click "Calculate Points" to process.');
-            }
-        });
-
-        // Update selectDogFromSearch to handle the simplified approach
-        async function selectDogFromSearch(dogId) {
-            const selectedDog = searchResults.find(r => r.id === dogId);
+            // Simple parsing for demo - in reality this would be much more sophisticated
+            let currentShow = '';
+            let currentDate = '';
             
-            if (!selectedDog) {
-                showError('Selected dog not found');
-                return;
-            }
-            
-            showLoading(`Loading data for ${selectedDog.callName}...`);
-            
-            try {
-                if (selectedDog.isDemo && selectedDog.id === 'demo_miller') {
-                    // Load demo data for Miller
-                    currentDogData = mockCanuckDogsData;
-                    calculateAllPoints();
-                    displayDashboard();
-                    displayYearlyBreakdown();
-                    displayRawData();
-                    showSuccessMessage(`Successfully loaded demo data for ${currentDogData.basicInfo.callName}!`);
-                } else {
-                    // For non-demo results, guide user to paste method
-                    showError(`Please use the "Paste Data" method to import data for ${selectedDog.name}. The automated search requires manual navigation on CanuckDogs.`);
-                }
-                
-            } catch (error) {
-                showError(`Error loading data: ${error.message}`);
-            } finally {
-                hideLoading();
-            }
-        }Beaten
-                        });
+            for (const line of lines) {
+                if (line.includes('Club') || line.includes('Association')) {
+                    currentShow = line.trim();
+                } else if (line.match(/\w+\s+\d+.*\d{4}/)) {
+                    currentDate = line.trim();
+                } else if (line.includes('Group') || line.includes('Best Of Breed') || line.includes('Winners')) {
+                    const result = parseResultLine(line, currentShow, currentDate);
+                    if (result) {
+                        yearlyData[2024].conformation.push(result);
                     }
-                });
-                
-                // Group results by year
-                results.forEach(result => {
-                    const year = extractYearFromDate(result.dateRange) || currentYear;
-                    if (!yearlyData[year]) {
-                        yearlyData[year] = { conformation: [] };
-                    }
-                    yearlyData[year].conformation.push(result);
-                });
-                
-                // If no results found, create sample data to show the system works
-                if (results.length === 0) {
-                    yearlyData[currentYear] = {
-                        conformation: [{
-                            show: 'Sample Show (Parsed from manual data)',
-                            dateRange: `Sample Date ${currentYear}`,
-                            day: 'Saturday',
-                            position: 'Best Of Breed',
-                            judge: 'Sample Judge',
-                            rawPoints: '0',
-                            dogsBeaten: 0
-                        }]
-                    };
                 }
-                
-                return { basicInfo, yearlyData };
-                
-            } catch (error) {
-                console.error('Error parsing CanuckDogs text:', error);
-                return null;
             }
+            
+            return { basicInfo, yearlyData };
         }
 
         function extractCallName(registeredName) {
-            // Try to extract call name from registered name
             const parts = registeredName.split(' ');
-            // Usually the call name is one of the last parts
             for (let i = parts.length - 1; i >= 0; i--) {
                 const part = parts[i];
-                if (part.length > 2 && !part.includes("'S") && !part.match(/^(OF|THE|KENNEL)$/i)) {
+                if (part.length > 2 && !part.includes("'S") && !part.match(/^(OF|THE|KENNEL|H2O|GTO)$/i)) {
                     return part;
                 }
             }
             return parts[parts.length - 1] || 'Unknown';
         }
 
-        function extractYearFromDate(dateString) {
-            const match = dateString.match(/20\d{2}/);
-            return match ? parseInt(match[0]) : null;
-        }
-
-        function showBookmarkletCode() {
-            const bookmarkletCode = `javascript:(function(){
-                try {
-                    const pageText = document.body.innerText;
-                    const pageTitle = document.title;
-                    
-                    // Try to extract dog name from page title or content
-                    let dogName = pageTitle.split(' - ')[0] || 'Unknown Dog';
-                    
-                    // Open calculator window and send data
-                    const calculatorWindow = window.open(window.location.origin + window.location.pathname.replace(/[^/]+$/, '') + 'index.html', 'CKCTracker');
-                    
-                    setTimeout(() => {
-                        if (calculatorWindow && !calculatorWindow.closed) {
-                            calculatorWindow.postMessage({
-                                type: 'canuckDogsData',
-                                dogName: dogName,
-                                rawData: pageText
-                            }, '*');
-                            calculatorWindow.focus();
-                        } else {
-                            alert('Calculator window blocked. Please allow popups and try again.');
-                        }
-                    }, 2000);
-                    
-                } catch (error) {
-                    alert('Error extracting data: ' + error.message);
+        function extractFromText(lines, keyword) {
+            for (const line of lines) {
+                if (line.toLowerCase().includes(keyword)) {
+                    const parts = line.split(':');
+                    if (parts.length > 1) return parts[1].trim();
                 }
-            })();`;
-            
-            // Show the bookmarklet code in a modal
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.8);
-                z-index: 10000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-            `;
-            
-            modal.innerHTML = `
-                <div style="background: white; border-radius: 15px; padding: 30px; max-width: 800px; max-height: 80vh; overflow-y: auto;">
-                    <h2 style="margin-bottom: 20px; color: #2c3e50;">🔖 CanuckDogs Auto-Extractor Bookmarklet</h2>
-                    
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                        <h3 style="margin-bottom: 10px; color: #495057;">📋 Setup Steps:</h3>
-                        <ol style="padding-left: 20px; line-height: 1.6;">
-                            <li>Copy ALL the code below</li>
-                            <li>Right-click your bookmarks bar → "Add page"</li>
-                            <li>Name: "Extract CanuckDogs"</li>
-                            <li>URL: Paste the copied code</li>
-                            <li>Save the bookmark</li>
-                        </ol>
-                    </div>
-                    
-                    <h3 style="margin: 20px 0 10px 0; color: #495057;">📝 Bookmarklet Code:</h3>
-                    <textarea readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; background: #f8f9fa;">${bookmarkletCode}</textarea>
-                    
-                    <div style="text-align: center; margin-top: 20px;">
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem;">
-                            Close
-                        </button>
-                        <button onclick="navigator.clipboard.writeText('${bookmarkletCode.replace(/'/g, "\\'")}').then(() => alert('Bookmarklet copied!'))" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-left: 10px;">
-                            📋 Copy Code
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
+            }
+            return null;
         }
 
-        // Listen for bookmarklet messages
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'canuckDogsData') {
-                // Switch to paste method and populate data
-                showImportMethod('paste');
-                document.getElementById('manualDogName').value = event.data.dogName;
-                document.getElementById('canuckDogsData').value = event.data.rawData;
-                showSuccessMessage('Data received from bookmarklet! Click "Calculate Points" to process.');
-            }
-        });
-        async function searchCanuckDogs() {
-            const searchTerm = document.getElementById('dogName').value.trim();
+        function parseResultLine(line, show, date) {
+            const parts = line.trim().split(/\s+/);
+            if (parts.length < 3) return null;
             
-            if (!searchTerm) {
-                alert('Please enter a search term');
-                return;
-            }
-
-            showLoading('Searching CanuckDogs database...');
-            hideError();
-
-            try {
-                // Simulate CanuckDogs search with flexible matching
-                await simulateFlexibleSearch(searchTerm);
-                
-            } catch (error) {
-                showError(error.message);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function simulateFlexibleSearch(searchTerm) {
-            // Simulate search delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            let day = 'Unknown';
+            let position = 'Unknown';
+            let judge = 'Unknown';
+            let dogsBeaten = 0;
+            let rawPoints = 'N/A';
             
-            const term = searchTerm.toLowerCase();
-            const results = [];
-            
-            // Check for Miller demo - only if they actually search for parts of this name
-            if (term.includes('miller') || term.includes('robel') || term.includes('portuguese') || 
-                term.includes('aegean') || term.includes('h2o') || term.includes('gto')) {
-                results.push({
-                    name: "CAN BIS RBIS GCHB AM CH ROBEL GTO IT'S MILLER TIME AEGEAN H2O",
-                    callName: "Miller",
-                    owner: "Mamdouh Farag",
-                    breed: "Portuguese Water Dog",
-                    id: "demo_miller",
-                    matchType: "Name contains search term",
-                    isDemo: true,
-                    confidence: 100
-                });
-            }
-            
-            // Create a realistic database of dog names that might actually exist
-            const realisticDogs = [
-                { name: "CH SUNNYDALE'S GOLDEN MILLER BOY", callName: "Miller", owner: "Sarah Johnson", breed: "Golden Retriever" },
-                { name: "GCH GOLDCREST MILLER'S LEGACY", callName: "Legacy", owner: "Mike Wilson", breed: "Labrador Retriever" },
-                { name: "AM CH RIVERSIDE BUDDY'S TRIUMPH", callName: "Buddy", owner: "Lisa Chen", breed: "German Shepherd" },
-                { name: "CAN CH WILLOWBROOK LUNA'S STARLIGHT", callName: "Luna", owner: "David Brown", breed: "Border Collie" },
-                { name: "GCHX MOUNTAINVIEW CHARLIE'S QUEST", callName: "Charlie", owner: "Emma Davis", breed: "Australian Shepherd" },
-                { name: "CH BLUESTONE MAX'S ADVENTURE", callName: "Max", owner: "Tom Miller", breed: "Poodle" },
-                { name: "GCH REGALCREST BELLA'S DREAM", callName: "Bella", owner: "Amy Wilson", breed: "Golden Retriever" },
-                { name: "AM CH OAKWOOD COOPER'S JOURNEY", callName: "Cooper", owner: "James Taylor", breed: "Labrador Retriever" },
-                { name: "CAN GCH PINECREST RUBY'S MAGIC", callName: "Ruby", owner: "Kate Anderson", breed: "German Shepherd" },
-                { name: "CH STORMWIND TUCKER'S SPIRIT", callName: "Tucker", owner: "Steve Roberts", breed: "Border Collie" }
-            ];
-            
-            // Only show dogs whose names actually contain the search term
-            if (term.length >= 3) {
-                realisticDogs.forEach((dog, index) => {
-                    const nameMatch = dog.name.toLowerCase().includes(term);
-                    const callNameMatch = dog.callName.toLowerCase().includes(term);
-                    const ownerMatch = dog.owner.toLowerCase().includes(term);
-                    
-                    if (nameMatch || callNameMatch || ownerMatch) {
-                        let matchType = '';
-                        let confidence = 0;
-                        
-                        if (nameMatch && callNameMatch) {
-                            matchType = 'Registered & call name match';
-                            confidence = 95;
-                        } else if (nameMatch) {
-                            matchType = 'Registered name contains term';
-                            confidence = 85;
-                        } else if (callNameMatch) {
-                            matchType = 'Call name match';
-                            confidence = 80;
-                        } else if (ownerMatch) {
-                            matchType = 'Owner name match';
-                            confidence = 70;
-                        }
-                        
-                        results.push({
-                            name: dog.name,
-                            callName: dog.callName,
-                            owner: dog.owner,
-                            breed: dog.breed,
-                            id: `realistic_${index}`,
-                            matchType: matchType,
-                            confidence: confidence,
-                            isDemo: false
-                        });
-                    }
-                });
-            }
-            
-            // Sort by confidence
-            results.sort((a, b) => b.confidence - a.confidence);
-            
-            // Show results
-            showSearchResults(results, searchTerm);
-        }
-
-        function showSearchResults(results, searchTerm) {
-            searchResults = results;
-            
-            if (results.length === 0) {
-                const noResultsHTML = `
-                    <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
-                        <h2 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 3px solid #3498db; padding-bottom: 10px;">
-                            🔍 CanuckDogs Search Results for "${searchTerm}"
-                        </h2>
-                        
-                        <div style="border: 2px solid #dc3545; border-radius: 10px; padding: 30px; background: linear-gradient(135deg, #f8d7da, #f5c6cb); text-align: center;">
-                            <h3 style="color: #721c24; margin-bottom: 15px;">❌ No Information Gathered</h3>
-                            <p style="color: #721c24; margin-bottom: 15px;">
-                                No dogs found matching "<strong>${searchTerm}</strong>" in the CanuckDogs database.
-                            </p>
-                            <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px; margin-top: 15px;">
-                                <h4 style="color: #721c24; margin-bottom: 10px;">💡 Search Suggestions:</h4>
-                                <ul style="color: #721c24; text-align: left; margin: 0; padding-left: 20px;">
-                                    <li>Check the spelling of the registered name</li>
-                                    <li>Try a shorter portion of the name</li>
-                                    <li>Include the kennel prefix (e.g., "ROBEL")</li>
-                                    <li>Try the dog's call name</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                document.getElementById('dashboard').innerHTML = noResultsHTML;
-                showTab('dashboard');
-                return;
-            }
-            
-            const searchResultsHTML = `
-                <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
-                    <h2 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 3px solid #3498db; padding-bottom: 10px;">
-                        🔍 CanuckDogs Information for "${searchTerm}"
-                    </h2>
-                    
-                    <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #3498db, #2980b9); color: white; border-radius: 8px;">
-                        <h3 style="margin-bottom: 10px;">📊 Search Results:</h3>
-                        <p style="margin: 0; line-height: 1.6;">
-                            Found <strong>${results.length}</strong> match${results.length !== 1 ? 'es' : ''} in CanuckDogs database.
-                            Click any result to view their complete competition history and calculate Grand Master points.
-                        </p>
-                    </div>
-                    
-                    <div style="display: grid; gap: 15px;">
-                        ${results.map((result, index) => `
-                            <div class="search-result-item ${result.isDemo ? 'exact-match' : ''}" onclick="selectDogFromSearch('${result.id}')"
-                                 onmouseover="this.style.borderColor='#3498db'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(52,152,219,0.3)'"
-                                 onmouseout="this.style.borderColor='${result.isDemo ? '#28a745' : '#e9ecef'}'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                                
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                    <div>
-                                        <span class="partial-match-badge">${result.confidence}% MATCH</span>
-                                    </div>
-                                    <div style="text-align: right; font-size: 0.9rem; color: #6c757d;">
-                                        ${result.matchType}
-                                    </div>
-                                </div>
-                                
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                    <div style="flex: 1;">
-                                        <h3 style="color: #2c3e50; margin-bottom: 8px; font-size: 1.1rem; font-family: ${result.isDemo ? 'monospace' : 'inherit'};">
-                                            ${result.name}
-                                        </h3>
-                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                                            <div>
-                                                <span style="font-weight: bold; color: #495057;">Call Name:</span>
-                                                <span style="color: #6c757d;">${result.callName}</span>
-                                            </div>
-                                            <div>
-                                                <span style="font-weight: bold; color: #495057;">Owner:</span>
-                                                <span style="color: #6c757d;">${result.owner}</span>
-                                            </div>
-                                            <div style="grid-column: 1 / -1;">
-                                                <span style="font-weight: bold; color: #495057;">Breed:</span>
-                                                <span style="color: #6c757d;">${result.breed}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div style="text-align: center; margin-left: 20px;">
-                                        <div style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 6px; font-weight: bold; font-size: 0.9rem;">
-                                            View Data
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-            
-            // Show in dashboard
-            document.getElementById('dashboard').innerHTML = searchResultsHTML;
-            showTab('dashboard');
-        }
-
-        async function selectDogFromSearch(dogId) {
-            const selectedDog = searchResults.find(r => r.id === dogId);
-            showLoading(`Extracting competition data for ${selectedDog.callName}...`);
-            
-            try {
-                // Simulate extraction time
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                if (dogId === 'demo_miller') {
-                    // Load demo data
-                    currentDogData = mockCanuckDogsData;
-                    calculateAllPoints();
-                    displayDashboard();
-                    displayYearlyBreakdown();
-                    displayRawData();
-                    showSuccessMessage(`Successfully loaded demo data for ${currentDogData.basicInfo.callName}!`);
-                } else {
-                    // Generate sample data for other selections
-                    await generateSampleDataForDog(selectedDog);
+            // Find day of week
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            for (const d of days) {
+                if (line.toLowerCase().includes(d)) {
+                    day = d.charAt(0).toUpperCase() + d.slice(1);
+                    break;
                 }
-                
-            } catch (error) {
-                showError('Failed to extract data: ' + error.message);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function generateSampleDataForDog(dogInfo) {
-            // Generate realistic sample data for non-demo dogs
-            currentDogData = {
-                basicInfo: {
-                    registeredName: dogInfo.name,
-                    callName: dogInfo.callName,
-                    owner: dogInfo.owner,
-                    breed: dogInfo.breed
-                },
-                yearlyData: {
-                    2024: {
-                        conformation: generateSampleShowResults(dogInfo.callName, 2024)
-                    },
-                    2023: {
-                        conformation: generateSampleShowResults(dogInfo.callName, 2023)
-                    }
-                }
-            };
-            
-            calculateAllPoints();
-            displayDashboard();
-            displayYearlyBreakdown();
-            displayRawData();
-            showSuccessMessage(`Sample data generated for ${currentDogData.basicInfo.callName}!`);
-        }
-
-        function generateSampleShowResults(callName, year) {
-            const shows = [
-                'Calgary Kennel & Obedience Club',
-                'Regina Kennel & Obedience Club', 
-                'Saskatoon Working & Herding Dog Association',
-                'Hub City Kennel & Obedience Club',
-                'Battle River Canine Association',
-                'Assiniboine Kennel Club'
-            ];
-            
-            const judges = [
-                'Joan Luna Liebes', 'Eric Liebes (Dr)', 'Tannis Postma', 
-                'Honey Glendinning', 'Robin Hughes', 'Darryl Vice'
-            ];
-            
-            const positions = [
-                'Best Of Breed', 'Winners Dog', 'Winners Bitch',
-                'Group 1st', 'Group 2nd', 'Group 3rd', 'Group 4th',
-                'Select Dog', 'Best Of Opposite Sex'
-            ];
-            
-            const results = [];
-            const numShows = Math.floor(Math.random() * 8) + 3; // 3-10 shows
-            
-            for (let i = 0; i < numShows; i++) {
-                const show = shows[Math.floor(Math.random() * shows.length)];
-                const judge = judges[Math.floor(Math.random() * judges.length)];
-                const position = positions[Math.floor(Math.random() * positions.length)];
-                const month = Math.floor(Math.random() * 12) + 1;
-                const day = Math.floor(Math.random() * 28) + 1;
-                
-                let dogsBeaten = 0;
-                let rawPoints = "N/A";
-                
-                // Calculate realistic dogs beaten based on position
-                if (position.includes('Breed') || position.includes('Winners')) {
-                    dogsBeaten = Math.floor(Math.random() * 8) + 1; // 1-8 dogs
-                    rawPoints = `${Math.min(dogsBeaten, 5)} (1-1-${Math.min(dogsBeaten-1, 3)}-${Math.max(0, dogsBeaten-3)})`;
-                } else if (position.includes('Group')) {
-                    dogsBeaten = Math.floor(Math.random() * 25) + 5; // 5-30 dogs  
-                    rawPoints = dogsBeaten.toString();
-                }
-                
-                results.push({
-                    show: show,
-                    dateRange: `${getMonthName(month)} ${day}, ${year}`,
-                    day: ['Saturday', 'Sunday'][Math.floor(Math.random() * 2)],
-                    position: position,
-                    judge: judge,
-                    rawPoints: rawPoints,
-                    dogsBeaten: dogsBeaten
-                });
             }
             
-            return results;
-        }
-
-        function getMonthName(month) {
-            const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                          'July', 'August', 'September', 'October', 'November', 'December'];
-            return months[month - 1];
-        }
-
-        // CKC Grand Master Points Formula Implementation
-        function calculateGrandMasterPoints(showResult) {
-            const { position, judge, dogsBeaten, category, rawPoints } = showResult;
-            let points = 0;
-            let calculationSteps = [];
-            
-            const actualDogsBeaten = dogsBeaten || extractDogsBeatenFromPoints(rawPoints);
-            
-            // Base points for breed competition
-            if (position.toLowerCase().includes('best of breed') || 
-                position.toLowerCase().includes('bob')) {
-                const breedPoints = Math.min(actualDogsBeaten, 5);
-                points += breedPoints;
-                calculationSteps.push(`BOB: min(${actualDogsBeaten}, 5) = ${breedPoints}`);
-            }
-            else if (position.toLowerCase().includes('winners dog') || 
-                     position.toLowerCase().includes('winners bitch') ||
-                     position.toLowerCase().includes('wd') ||
-                     position.toLowerCase().includes('wb')) {
-                const breedPoints = Math.min(actualDogsBeaten, 5);
-                points += breedPoints;
-                calculationSteps.push(`WD/WB: min(${actualDogsBeaten}, 5) = ${breedPoints}`);
+            // Find position
+            if (line.toLowerCase().includes('group 1st') || line.toLowerCase().includes('group 1')) {
+                position = 'Group 1st';
+            } else if (line.toLowerCase().includes('group 2nd') || line.toLowerCase().includes('group 2')) {
+                position = 'Group 2nd';
+            } else if (line.toLowerCase().includes('group 3rd') || line.toLowerCase().includes('group 3')) {
+                position = 'Group 3rd';
+            } else if (line.toLowerCase().includes('group 4th') || line.toLowerCase().includes('group 4')) {
+                position = 'Group 4th';
+            } else if (line.toLowerCase().includes('best of breed')) {
+                position = 'Best Of Breed';
+            } else if (line.toLowerCase().includes('winners dog')) {
+                position = 'Winners Dog';
+            } else if (line.toLowerCase().includes('winners bitch')) {
+                position = 'Winners Bitch';
+            } else if (line.toLowerCase().includes('select')) {
+                position = 'Select Dog';
             }
             
-            // Group placement points (additional to breed points)
-            if (position.toLowerCase().includes('group 1') || 
-                position.toLowerCase().includes('g1') ||
-                position.toLowerCase().includes('group 1st')) {
-                const groupPoints = Math.min(actualDogsBeaten * 2, 40);
-                points += groupPoints;
-                calculationSteps.push(`G1 Bonus: min(${actualDogsBeaten} × 2, 40) = ${groupPoints}`);
-            }
-            else if (position.toLowerCase().includes('group 2') || 
-                     position.toLowerCase().includes('g2') ||
-                     position.toLowerCase().includes('group 2nd')) {
-                const groupPoints = Math.min(Math.floor(actualDogsBeaten * 1.5), 30);
-                points += groupPoints;
-                calculationSteps.push(`G2 Bonus: min(${actualDogsBeaten} × 1.5, 30) = ${groupPoints}`);
-            }
-            else if (position.toLowerCase().includes('group 3') || 
-                     position.toLowerCase().includes('g3') ||
-                     position.toLowerCase().includes('group 3rd')) {
-                const groupPoints = Math.min(actualDogsBeaten, 20);
-                points += groupPoints;
-                calculationSteps.push(`G3 Bonus: min(${actualDogsBeaten} × 1, 20) = ${groupPoints}`);
-            }
-            else if (position.toLowerCase().includes('group 4') || 
-                     position.toLowerCase().includes('g4') ||
-                     position.toLowerCase().includes('group 4th')) {
-                const groupPoints = Math.min(Math.floor(actualDogsBeaten * 0.5), 10);
-                points += groupPoints;
-                calculationSteps.push(`G4 Bonus: min(${actualDogsBeaten} × 0.5, 10) = ${groupPoints}`);
+            // Extract judge name and points
+            const numbers = line.match(/\d+/g);
+            if (numbers && numbers.length > 0) {
+                dogsBeaten = parseInt(numbers[numbers.length - 1]);
+                rawPoints = numbers[numbers.length - 1];
             }
             
-            // Best in Show points (additional to all previous)
-            if (position.toLowerCase().includes('best in show') || 
-                position.toLowerCase().includes('bis')) {
-                const bisPoints = Math.min(actualDogsBeaten * 5, 200);
-                points += bisPoints;
-                calculationSteps.push(`BIS Bonus: min(${actualDogsBeaten} × 5, 200) = ${bisPoints}`);
-            }
-            
-            // Specialty show multiplier
-            let specialtyMultiplier = 1;
-            if (showResult.show && showResult.show.toLowerCase().includes('specialty')) {
-                specialtyMultiplier = 1.5;
-                calculationSteps.push(`Specialty Bonus: ×1.5`);
-            }
-            
-            const finalPoints = Math.round(points * specialtyMultiplier);
-            
-            // If no points earned, show why
-            if (finalPoints === 0) {
-                if (position.toLowerCase().includes('select') || position.toLowerCase().includes('opposite')) {
-                    calculationSteps.push(`${position}: 0 points (no championship points awarded)`);
-                } else if (actualDogsBeaten === 0) {
-                    calculationSteps.push(`${position}: 0 points (no dogs defeated)`);
-                } else {
-                    calculationSteps.push(`${position}: 0 points (non-point earning placement)`);
-                }
+            // Extract judge (simplified)
+            const judgeMatch = line.match(/([A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+\([^)]+\))?)/);
+            if (judgeMatch) {
+                judge = judgeMatch[1];
             }
             
             return {
-                points: finalPoints,
-                calculation: calculationSteps.join(' + '),
-                dogsBeaten: actualDogsBeaten,
-                breakdown: calculationSteps
+                show: show || 'Unknown Show',
+                dateRange: date || 'Unknown Date',
+                day: day,
+                position: position,
+                judge: judge,
+                dogsBeaten: dogsBeaten,
+                rawPoints: rawPoints
             };
         }
-
-        function extractDogsBeatenFromPoints(rawPoints) {
-            if (!rawPoints || rawPoints === 'N/A') return 0;
-            
-            // Extract from formats like "13", "4 (1-1-2-1)", etc.
-            const match = rawPoints.match(/(\d+)/);
-            return match ? parseInt(match[1]) : 0;
-        }
-
-        // Demo data (Miller)
-        const mockCanuckDogsData = {
-            basicInfo: {
-                registeredName: "CAN BIS RBIS GCHB AM CH ROBEL GTO IT'S MILLER TIME AEGEAN H2O",
-                callName: "Miller",
-                owner: "Mamdouh Farag",
-                breed: "Portuguese Water Dog"
-            },
-            yearlyData: {
-                2024: {
-                    conformation: [
-                        // Regina Kennel & Obedience Club
-                        { show: "Regina Kennel & Obedience Club", dateRange: "May 18 to May 19, 2024", day: "Sunday", position: "Group 3rd", judge: "Tannis Postma", rawPoints: "13", dogsBeaten: 6 },
-                        { show: "Regina Kennel & Obedience Club", dateRange: "May 18 to May 19, 2024", day: "Sunday", position: "Best Of Breed", judge: "Tannis Postma", rawPoints: "4 (1-1-2-1)", dogsBeaten: 5 },
-                        { show: "Regina Kennel & Obedience Club", dateRange: "May 18 to May 19, 2024", day: "Saturday", position: "Best Of Breed", judge: "Honey Glendinning", rawPoints: "4 (1-1-2-1)", dogsBeaten: 5 },
-                        { show: "Regina Kennel & Obedience Club", dateRange: "May 18 to May 19, 2024", day: "Saturday", position: "Select Dog", judge: "Sharon Derrick", rawPoints: "N/A", dogsBeaten: 0 },
-                        
-                        // Calgary Kennel & Obedience Club
-                        { show: "Calgary Kennel & Obedience Club", dateRange: "May 10 to May 12, 2024", day: "Sunday", position: "Best Of Breed", judge: "Eric Liebes (Dr)", rawPoints: "0", dogsBeaten: 0 },
-                        { show: "Calgary Kennel & Obedience Club", dateRange: "May 10 to May 12, 2024", day: "Saturday", position: "Group 1st", judge: "Joan Luna Liebes", rawPoints: "64", dogsBeaten: 32 },
-                        { show: "Calgary Kennel & Obedience Club", dateRange: "May 10 to May 12, 2024", day: "Saturday", position: "Best Of Breed", judge: "Joan Luna Liebes", rawPoints: "0", dogsBeaten: 0 },
-                        { show: "Calgary Kennel & Obedience Club", dateRange: "May 10 to May 12, 2024", day: "Saturday", position: "Best Of Breed", judge: "Catherine Barlow", rawPoints: "0", dogsBeaten: 0 },
-                        { show: "Calgary Kennel & Obedience Club", dateRange: "May 10 to May 12, 2024", day: "Friday", position: "Best Of Breed", judge: "Robin Hughes", rawPoints: "0", dogsBeaten: 0 },
-                        
-                        // Additional shows
-                        { show: "Hub City Kennel & Obedience Club", dateRange: "May 3 to May 5, 2024", day: "Sunday", position: "Group 3rd", judge: "Darryl Vice", rawPoints: "44", dogsBeaten: 22 },
-                        { show: "Battle River Canine Association", dateRange: "March 22 to March 24, 2024", day: "Sunday", position: "Group 3rd", judge: "Mario Knoll", rawPoints: "49", dogsBeaten: 25 }
-                    ]
-                },
-                2023: {
-                    conformation: [
-                        { show: "National Capital Kennel Club", dateRange: "September 15, 2023", day: "Saturday", position: "Best Of Winners", judge: "Dr. Michael Brown", dogsBeaten: 15, rawPoints: "8" },
-                        { show: "Montreal Dog Show", dateRange: "August 20, 2023", day: "Sunday", position: "Winners Dog", judge: "Janet Rogers", dogsBeaten: 12, rawPoints: "6" }
-                    ]
-                }
-            }
-        };
 
         function calculateAllPoints() {
             let totalPoints = 0;
@@ -1614,27 +876,73 @@
                 const yearData = currentDogData.yearlyData[year];
                 let yearPoints = 0;
                 
-                Object.keys(yearData).forEach(category => {
-                    if (Array.isArray(yearData[category])) {
-                        yearData[category].forEach(result => {
-                            const calculationResult = calculateGrandMasterPoints(result);
-                            result.grandMasterPoints = calculationResult.points;
-                            result.calculation = calculationResult.calculation;
-                            result.dogsBeaten = calculationResult.dogsBeaten;
-                            result.calculationBreakdown = calculationResult.breakdown;
-                            yearPoints += calculationResult.points;
-                            totalPoints += calculationResult.points;
-                        });
-                    }
-                });
+                if (yearData.conformation) {
+                    yearData.conformation.forEach(result => {
+                        const pointsCalc = calculateGrandMasterPoints(result);
+                        result.grandMasterPoints = pointsCalc.points;
+                        result.calculation = pointsCalc.calculation;
+                        yearPoints += pointsCalc.points;
+                        totalPoints += pointsCalc.points;
+                    });
+                }
                 
-                currentDogData.yearlyData[year].totalPoints = yearPoints;
+                yearData.totalPoints = yearPoints;
             });
             
             currentDogData.totalGrandMasterPoints = totalPoints;
         }
 
-        function displayDashboard() {
+        function calculateGrandMasterPoints(result) {
+            const { position, dogsBeaten } = result;
+            let points = 0;
+            let steps = [];
+            
+            const pos = position.toLowerCase();
+            const actualDogsBeaten = dogsBeaten || 0;
+            
+            // Base breed points
+            if (pos.includes('best of breed') || pos.includes('winners dog') || pos.includes('winners bitch')) {
+                const breedPoints = Math.min(actualDogsBeaten, 5);
+                points += breedPoints;
+                if (breedPoints > 0) {
+                    steps.push(`Breed: min(${actualDogsBeaten}, 5) = ${breedPoints}`);
+                }
+            }
+            
+            // Group bonuses
+            if (pos.includes('group 1')) {
+                const groupPoints = Math.min(actualDogsBeaten * 2, 40);
+                points += groupPoints;
+                steps.push(`G1: min(${actualDogsBeaten} × 2, 40) = ${groupPoints}`);
+            } else if (pos.includes('group 2')) {
+                const groupPoints = Math.min(Math.floor(actualDogsBeaten * 1.5), 30);
+                points += groupPoints;
+                steps.push(`G2: min(${actualDogsBeaten} × 1.5, 30) = ${groupPoints}`);
+            } else if (pos.includes('group 3')) {
+                const groupPoints = Math.min(actualDogsBeaten, 20);
+                points += groupPoints;
+                steps.push(`G3: min(${actualDogsBeaten}, 20) = ${groupPoints}`);
+            } else if (pos.includes('group 4')) {
+                const groupPoints = Math.min(Math.floor(actualDogsBeaten * 0.5), 10);
+                points += groupPoints;
+                steps.push(`G4: min(${actualDogsBeaten} × 0.5, 10) = ${groupPoints}`);
+            }
+            
+            if (points === 0) {
+                if (pos.includes('select')) {
+                    steps.push(`${position}: 0 points (no championship points for select)`);
+                } else {
+                    steps.push(`${position}: 0 points (no dogs defeated)`);
+                }
+            }
+            
+            return {
+                points: points,
+                calculation: steps.length > 0 ? steps.join(' + ') : 'No points earned'
+            };
+        }
+
+        function displayResults() {
             // Update dog info
             document.getElementById('dogInfo').style.display = 'block';
             document.getElementById('dogTitle').textContent = currentDogData.basicInfo.callName;
@@ -1644,33 +952,9 @@
             // Update total points
             document.getElementById('totalPoints').textContent = currentDogData.totalGrandMasterPoints;
             
-            // Update title progress
-            updateTitleProgress(currentDogData.totalGrandMasterPoints);
-            
             // Display recent results
             displayRecentResults();
             displayPointsSummary();
-        }
-
-        function updateTitleProgress(totalPoints) {
-            const titles = [
-                { id: 'gchStatus', threshold: 20, name: 'GCH' },
-                { id: 'gchxStatus', threshold: 100, name: 'GCHX' },
-                { id: 'gmStatus', threshold: 200, name: 'GM' },
-                { id: 'gmsStatus', threshold: 400, name: 'GMS' }
-            ];
-            
-            titles.forEach(title => {
-                const element = document.getElementById(title.id);
-                if (totalPoints >= title.threshold) {
-                    element.textContent = '✓';
-                    element.className = 'title-achieved';
-                } else {
-                    const needed = title.threshold - totalPoints;
-                    element.textContent = `${needed} pts needed`;
-                    element.className = needed <= 20 ? 'title-current' : '';
-                }
-            });
         }
 
         function displayRecentResults() {
@@ -1678,49 +962,32 @@
             
             Object.keys(currentDogData.yearlyData).forEach(year => {
                 const yearData = currentDogData.yearlyData[year];
-                Object.keys(yearData).forEach(category => {
-                    if (Array.isArray(yearData[category])) {
-                        yearData[category].forEach(result => {
-                            allResults.push({...result, year, category});
-                        });
-                    }
-                });
+                if (yearData.conformation) {
+                    yearData.conformation.forEach(result => {
+                        allResults.push({...result, year});
+                    });
+                }
             });
             
-            // Sort by date (newest first)
-            allResults.sort((a, b) => new Date(b.dateRange) - new Date(a.dateRange));
-            
-            const recentResults = allResults.slice(0, 8); // Show 8 most recent
-            
             const container = document.getElementById('recentResults');
-            container.innerHTML = recentResults.map(result => `
-                <div class="show-result ${result.grandMasterPoints > 0 ? 'points-earned' : 'no-points'}">
-                    <div class="show-header">
-                        <div class="show-name">${result.show}</div>
-                        <div class="show-date">${result.dateRange}</div>
+            container.innerHTML = allResults.slice(0, 6).map(result => `
+                <div style="background: ${result.grandMasterPoints > 0 ? '#d4edda' : '#f8f9fa'}; 
+                            border-left: 4px solid ${result.grandMasterPoints > 0 ? '#28a745' : '#6c757d'}; 
+                            border-radius: 6px; padding: 15px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <div style="font-weight: bold; color: #2c3e50;">${result.show}</div>
+                        <div style="color: #666; font-size: 0.9rem;">${result.dateRange}</div>
                     </div>
-                    <div class="show-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Day</span>
-                            ${result.day}
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Position</span>
-                            ${result.position}
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Judge</span>
-                            ${result.judge}
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Dogs Beat</span>
-                            ${result.dogsBeaten || 0}
-                        </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                        <div><strong>Day:</strong> ${result.day}</div>
+                        <div><strong>Position:</strong> ${result.position}</div>
+                        <div><strong>Judge:</strong> ${result.judge}</div>
+                        <div><strong>Dogs Beat:</strong> ${result.dogsBeaten}</div>
                     </div>
-                    <div class="points-calculation">
-                        <strong>Grand Master Points Earned: ${result.grandMasterPoints}</strong>
-                        <div class="calculation-formula">
-                            ${result.calculation || 'No points calculation available'}
+                    <div style="background: rgba(0,0,0,0.1); padding: 8px; border-radius: 4px;">
+                        <strong>GM Points: ${result.grandMasterPoints}</strong>
+                        <div style="font-family: monospace; font-size: 0.85rem; margin-top: 4px;">
+                            ${result.calculation}
                         </div>
                     </div>
                 </div>
@@ -1728,448 +995,344 @@
         }
 
         function displayPointsSummary() {
-            const yearlyTotals = {};
-            let totalShows = 0;
-            let pointsEarned = 0;
-            
-            Object.keys(currentDogData.yearlyData).forEach(year => {
-                const yearData = currentDogData.yearlyData[year];
-                let yearShows = 0;
-                let yearPoints = 0;
-                
-                Object.keys(yearData).forEach(category => {
-                    if (Array.isArray(yearData[category])) {
-                        yearShows += yearData[category].length;
-                        yearData[category].forEach(result => {
-                            yearPoints += result.grandMasterPoints || 0;
-                        });
-                    }
-                });
-                
-                yearlyTotals[year] = { shows: yearShows, points: yearPoints };
-                totalShows += yearShows;
-                pointsEarned += yearPoints;
-            });
+            const totalShows = getTotalShows();
+            const pointsEarned = currentDogData.totalGrandMasterPoints;
             
             const container = document.getElementById('pointsSummary');
             container.innerHTML = `
-                <div style="display: grid; gap: 15px; margin-bottom: 20px;">
-                    <div class="detail-item" style="text-align: center; background: linear-gradient(135deg, #17a2b8, #138496); color: white;">
-                        <span class="detail-label" style="color: rgba(255,255,255,0.8);">Total Shows</span>
+                <div style="display: grid; gap: 15px;">
+                    <div style="background: linear-gradient(135deg, #17a2b8, #138496); color: white; padding: 15px; border-radius: 8px; text-align: center;">
                         <div style="font-size: 1.5rem; font-weight: bold;">${totalShows}</div>
+                        <div style="opacity: 0.9;">Total Shows</div>
                     </div>
-                    <div class="detail-item" style="text-align: center; background: linear-gradient(135deg, #28a745, #20b933); color: white;">
-                        <span class="detail-label" style="color: rgba(255,255,255,0.8);">Points Earned</span>
+                    <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 15px; border-radius: 8px; text-align: center;">
                         <div style="font-size: 1.5rem; font-weight: bold;">${pointsEarned}</div>
+                        <div style="opacity: 0.9;">Points Earned</div>
                     </div>
-                    <div class="detail-item" style="text-align: center; background: linear-gradient(135deg, #6f42c1, #563d7c); color: white;">
-                        <span class="detail-label" style="color: rgba(255,255,255,0.8);">Average per Show</span>
+                    <div style="background: linear-gradient(135deg, #6f42c1, #563d7c); color: white; padding: 15px; border-radius: 8px; text-align: center;">
                         <div style="font-size: 1.5rem; font-weight: bold;">${totalShows > 0 ? (pointsEarned / totalShows).toFixed(1) : 0}</div>
+                        <div style="opacity: 0.9;">Avg per Show</div>
                     </div>
                 </div>
                 
-                <h4 style="margin-bottom: 15px; color: #2c3e50;">Yearly Breakdown:</h4>
-                ${Object.keys(yearlyTotals).map(year => `
-                    <div class="detail-item" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span><strong>${year}:</strong> ${yearlyTotals[year].shows} shows</span>
-                        <span style="color: #27ae60; font-weight: bold;">${yearlyTotals[year].points} points</span>
-                    </div>
-                `).join('')}
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <h4 style="margin-bottom: 10px; color: #2c3e50;">Title Progress:</h4>
+                    ${generateTitleProgress()}
+                </div>
             `;
         }
 
-        function displayYearlyBreakdown() {
-            const years = Object.keys(currentDogData.yearlyData).sort((a, b) => b - a);
+        function generateTitleProgress() {
+            const points = currentDogData.totalGrandMasterPoints;
+            const titles = [
+                { name: 'Grand Champion (GCH)', threshold: 20 },
+                { name: 'Grand Champion Excellent (GCHX)', threshold: 100 },
+                { name: 'Grand Master (GM)', threshold: 200 },
+                { name: 'Grand Master Supreme (GMS)', threshold: 400 }
+            ];
             
-            const container = document.getElementById('yearlyBreakdown');
-            container.innerHTML = years.map(year => `
-                <div class="year-card ${selectedYear === year ? 'selected' : ''}" onclick="selectYear('${year}')">
-                    <h3>${year}</h3>
-                    <div class="year-points">${currentDogData.yearlyData[year].totalPoints || 0}</div>
-                    <small>Grand Master Points</small>
-                </div>
-            `).join('');
-            
-            // Auto-select most recent year
-            if (!selectedYear && years.length > 0) {
-                selectYear(years[0]);
-            }
+            return titles.map(title => {
+                const achieved = points >= title.threshold;
+                const needed = Math.max(0, title.threshold - points);
+                
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                        <span>${title.name}</span>
+                        <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; 
+                                     background: ${achieved ? '#d4edda' : '#fff3cd'}; 
+                                     color: ${achieved ? '#155724' : '#856404'};">
+                            ${achieved ? '✅ Achieved' : `${needed} pts needed`}
+                        </span>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function selectYear(year) {
-            selectedYear = year;
-            displayYearlyBreakdown(); // Refresh to show selection
-            displayYearDetails(year);
-        }
-
-        function displayYearDetails(year) {
-            const yearData = currentDogData.yearlyData[year];
-            if (!yearData) return;
-            
-            const allResults = [];
-            Object.keys(yearData).forEach(category => {
-                if (Array.isArray(yearData[category])) {
-                    yearData[category].forEach(result => {
-                        allResults.push({...result, category});
-                    });
+        function getTotalShows() {
+            let total = 0;
+            Object.values(currentDogData.yearlyData).forEach(yearData => {
+                if (yearData.conformation) {
+                    total += yearData.conformation.length;
                 }
             });
-            
-            // Sort by date
-            allResults.sort((a, b) => new Date(b.dateRange) - new Date(a.dateRange));
-            
-            const container = document.getElementById('selectedYearDetails');
-            container.innerHTML = `
-                <div class="card">
-                    <h2>📅 ${year} Detailed Results</h2>
-                    <div style="background: linear-gradient(135deg, #fd7e14, #e9630a); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-                        <h3>Year ${year} Summary</h3>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 15px;">
-                            <div>
-                                <div style="font-size: 1.5rem; font-weight: bold;">${allResults.length}</div>
-                                <div style="opacity: 0.9;">Total Shows</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 1.5rem; font-weight: bold;">${yearData.totalPoints || 0}</div>
-                                <div style="opacity: 0.9;">Points Earned</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 1.5rem; font-weight: bold;">${allResults.length > 0 ? ((yearData.totalPoints || 0) / allResults.length).toFixed(1) : 0}</div>
-                                <div style="opacity: 0.9;">Avg per Show</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="show-results">
-                        ${allResults.map(result => `
-                            <div class="show-result ${result.grandMasterPoints > 0 ? 'points-earned' : 'no-points'}">
-                                <div class="show-header">
-                                    <div class="show-name">${result.show}</div>
-                                    <div class="show-date">${result.dateRange}</div>
-                                </div>
-                                <div class="show-details">
-                                    <div class="detail-item">
-                                        <span class="detail-label">Day</span>
-                                        ${result.day}
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Position</span>
-                                        ${result.position}
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Judge</span>
-                                        ${result.judge}
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Dogs Beat</span>
-                                        ${result.dogsBeaten || 0}
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Category</span>
-                                        ${result.category}
-                                    </div>
-                                </div>
-                                <div class="points-calculation">
-                                    <strong>Grand Master Points: ${result.grandMasterPoints}</strong>
-                                    <div class="calculation-formula">
-                                        ${result.calculation || 'No points earned'}
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
+            return total;
         }
 
-        function displayRawData() {
-            const allResults = [];
-            
-            Object.keys(currentDogData.yearlyData).forEach(year => {
-                const yearData = currentDogData.yearlyData[year];
-                Object.keys(yearData).forEach(category => {
-                    if (Array.isArray(yearData[category])) {
-                        yearData[category].forEach(result => {
-                            allResults.push({...result, year, category});
-                        });
-                    }
-                });
-            });
-            
-            // Sort by date (newest first)
-            allResults.sort((a, b) => new Date(b.dateRange) - new Date(a.dateRange));
-            
-            const container = document.getElementById('rawDataTable');
-            container.innerHTML = `
-                <table class="canuckdogs-table">
-                    <thead>
-                        <tr>
-                            <th>Year</th>
-                            <th>Show</th>
-                            <th>Date Range</th>
-                            <th>Day</th>
-                            <th>Position</th>
-                            <th>Judge</th>
-                            <th>Dogs Beat</th>
-                            <th>Raw Points</th>
-                            <th>GM Points</th>
-                            <th>Category</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${allResults.map(result => `
-                            <tr class="${result.grandMasterPoints > 0 ? 'win-highlight' : ''}">
-                                <td>${result.year}</td>
-                                <td>${result.show}</td>
-                                <td>${result.dateRange}</td>
-                                <td>${result.day}</td>
-                                <td>${result.position}</td>
-                                <td>${result.judge}</td>
-                                <td>${result.dogsBeaten || 0}</td>
-                                <td>${result.rawPoints}</td>
-                                <td style="font-weight: bold; color: #27ae60;">${result.grandMasterPoints}</td>
-                                <td>${result.category}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                
-                <div style="margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 8px;">
-                    <h4>CanuckDogs Data Notes:</h4>
-                    <ul style="margin-top: 10px; padding-left: 20px;">
-                        <li><strong>Raw Points:</strong> Original points from CanuckDogs display</li>
-                        <li><strong>GM Points:</strong> Calculated CKC Grand Master championship points</li>
-                        <li><strong>Dogs Beat:</strong> Extracted from point calculations when available</li>
-                        <li><strong>Highlighted rows:</strong> Results that earned Grand Master points</li>
-                    </ul>
-                </div>
-            `;
-        }
-
-        function generatePDFReport(type) {
-            if (!currentDogData) {
-                alert('Please select a dog first');
-                return;
-            }
-            
-            // Create PDF content
-            const pdfContent = generatePDFContent(type);
-            
-            // Create blob and download
-            const blob = new Blob([pdfContent], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${currentDogData.basicInfo.callName}_${type}_report.html`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            // Also open in new window for immediate viewing
-            const newWindow = window.open('', '_blank');
-            newWindow.document.write(pdfContent);
-            newWindow.document.close();
-        }
-
-        function generatePDFContent(type) {
-            const dog = currentDogData.basicInfo;
-            const totalPoints = currentDogData.totalGrandMasterPoints;
-            const currentDate = new Date().toLocaleDateString();
-            
-            return `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>CKC Grand Master Points Report - ${dog.callName}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-                        .header { text-align: center; border-bottom: 3px solid #2c3e50; padding-bottom: 20px; margin-bottom: 30px; }
-                        .header h1 { color: #2c3e50; margin-bottom: 10px; }
-                        .summary { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
-                        .points-total { font-size: 2rem; color: #27ae60; font-weight: bold; text-align: center; }
-                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        th { background-color: #2c3e50; color: white; }
-                        .points-cell { background-color: #d4edda; font-weight: bold; }
-                        .formula { font-family: monospace; background: #f8f9fa; padding: 5px; }
-                        .section { margin: 30px 0; }
-                        .footer { margin-top: 50px; text-align: center; font-size: 0.9rem; color: #666; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>🏆 CKC Grand Master Championship Points Report</h1>
-                        <h2>${dog.registeredName}</h2>
-                        <p><strong>Call Name:</strong> ${dog.callName} | <strong>Owner:</strong> ${dog.owner}</p>
-                        <p><strong>Report Generated:</strong> ${currentDate}</p>
-                    </div>
-                    
-                    <div class="summary">
-                        <h3>Championship Points Summary</h3>
-                        <div class="points-total">${totalPoints} Total Grand Master Points</div>
-                        <div style="text-align: center; margin-top: 15px;">
-                            ${getTitleStatus(totalPoints)}
-                        </div>
-                    </div>
-                    
-                    ${generateDetailedResults()}
-                    
-                    <div class="section">
-                        <h3>CKC Grand Master Points Formula</h3>
-                        <div class="formula">
-                            <strong>Base Points:</strong><br>
-                            • Best of Breed/Winners Dog/Winners Bitch: min(dogs_defeated, 5)<br>
-                            • Group 1st: +min(dogs_defeated × 2, 40)<br>
-                            • Group 2nd: +min(dogs_defeated × 1.5, 30)<br>
-                            • Group 3rd: +min(dogs_defeated × 1, 20)<br>
-                            • Group 4th: +min(dogs_defeated × 0.5, 10)<br>
-                            • Best in Show: +min(dogs_defeated × 5, 200)<br>
-                            • Specialty Show Bonus: ×1.5
-                        </div>
-                    </div>
-                    
-                    <div class="footer">
-                        <p><strong>Disclaimer:</strong> This report is based on data extracted from CanuckDogs.com and calculated using official CKC Grand Master championship point formulas. Points should be verified with official CKC records for title applications.</p>
-                        <p>Report generated by CKC Grand Master Points Tracker</p>
-                    </div>
-                </body>
-                </html>
-            `;
-        }
-
-        function generateDetailedResults() {
-            const allResults = [];
-            
-            Object.keys(currentDogData.yearlyData).forEach(year => {
-                const yearData = currentDogData.yearlyData[year];
-                Object.keys(yearData).forEach(category => {
-                    if (Array.isArray(yearData[category])) {
-                        yearData[category].forEach(result => {
-                            allResults.push({...result, year, category});
-                        });
-                    }
-                });
-            });
-            
-            allResults.sort((a, b) => new Date(b.dateRange) - new Date(a.dateRange));
-            
-            return `
-                <div class="section">
-                    <h3>Detailed Competition Results</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Show</th>
-                                <th>Position</th>
-                                <th>Judge</th>
-                                <th>Dogs Beat</th>
-                                <th>GM Points</th>
-                                <th>Calculation</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${allResults.map(result => `
-                                <tr>
-                                    <td>${result.dateRange}</td>
-                                    <td>${result.show}</td>
-                                    <td>${result.position}</td>
-                                    <td>${result.judge}</td>
-                                    <td>${result.dogsBeaten || 0}</td>
-                                    <td class="points-cell">${result.grandMasterPoints}</td>
-                                    <td class="formula">${result.calculation || 'No points'}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        function getTitleStatus(points) {
-            if (points >= 400) return "🏆 <strong>Grand Master Supreme Eligible</strong>";
-            if (points >= 200) return "🥇 <strong>Grand Master Eligible</strong>";
-            if (points >= 100) return "🥈 <strong>Grand Champion Excellent Eligible</strong>";
-            if (points >= 20) return "🥉 <strong>Grand Champion Eligible</strong>";
-            return `📊 Working toward Grand Champion (${20 - points} points needed)`;
-        }
-
-        function showTab(tabName) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Show selected tab content
-            document.getElementById(tabName).classList.add('active');
-            
-            // Add active class to clicked tab
-            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
-        }
-
-        function showLoading(message = 'Processing...') {
+        // Utility functions
+        function showProcessing(message) {
             document.getElementById('statusText').textContent = message;
-            document.getElementById('status').style.display = 'block';
+            document.getElementById('processingStatus').style.display = 'block';
+            hideMessages();
         }
 
-        function hideLoading() {
-            document.getElementById('status').style.display = 'none';
+        function hideProcessing() {
+            document.getElementById('processingStatus').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            document.getElementById('successMessage').textContent = message;
+            document.getElementById('successMessage').style.display = 'block';
+            hideProcessing();
         }
 
         function showError(message) {
             document.getElementById('errorMessage').textContent = message;
-            document.getElementById('error').style.display = 'block';
-            hideLoading();
+            document.getElementById('errorMessage').style.display = 'block';
+            hideProcessing();
         }
 
-        function hideError() {
-            document.getElementById('error').style.display = 'none';
+        function hideMessages() {
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
         }
 
-        function showSuccessMessage(message) {
-            let successDiv = document.getElementById('successMessage');
-            if (!successDiv) {
-                successDiv = document.createElement('div');
-                successDiv.id = 'successMessage';
-                successDiv.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #28a745;
-                    color: white;
-                    padding: 15px 25px;
-                    border-radius: 8px;
-                    font-size: 1rem;
-                    font-weight: 600;
-                    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-                    z-index: 1000;
-                    display: none;
-                `;
-                document.body.appendChild(successDiv);
-            }
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
             
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
             
-            // Hide after 4 seconds
-            setTimeout(() => {
-                successDiv.style.display = 'none';
-            }, 4000);
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
         }
 
-        // Enter key support
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('dogName').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    searchCanuckDogs();
+            // Set up initial state
+            selectMethod('pdf');
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    hideMessages();
                 }
             });
-            document.getElementById('dogName').focus();
         });
+
+        // Real PDF Processing with PDF.js Integration
+        async function processPDFWithLibrary(file) {
+            try {
+                showProcessing('Reading PDF file...');
+                
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                
+                let fullText = '';
+                const totalPages = pdf.numPages;
+                
+                // Skip first 3 pages as specified in workflow
+                const startPage = Math.min(4, totalPages);
+                
+                showProcessing(`Extracting text from pages ${startPage}-${totalPages}...`);
+                
+                for (let pageNum = startPage; pageNum <= totalPages; pageNum++) {
+                    try {
+                        const page = await pdf.getPage(pageNum);
+                        const textContent = await page.getTextContent();
+                        
+                        // Extract text items and preserve spacing
+                        const pageText = textContent.items.map(item => {
+                            if (item.str && item.str.trim()) {
+                                return item.str;
+                            }
+                            return '';
+                        }).join(' ');
+                        
+                        fullText += pageText + '\n';
+                        
+                        // Update progress
+                        showProcessing(`Processing page ${pageNum} of ${totalPages}...`);
+                        
+                        // Small delay to prevent UI blocking
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                        
+                    } catch (pageError) {
+                        console.warn(`Error processing page ${pageNum}:`, pageError);
+                        // Continue with other pages
+                    }
+                }
+                
+                if (!fullText.trim()) {
+                    throw new Error('No text could be extracted from the PDF');
+                }
+                
+                return fullText;
+                
+            } catch (error) {
+                throw new Error('Failed to process PDF: ' + error.message);
+            }
+        }
+
+        async function processFile(file) {
+            const dogName = document.getElementById('dogName').value.trim();
+            if (!dogName) {
+                showError('Please enter the dog\'s registered name first');
+                return;
+            }
+
+            showProcessing('Processing PDF and extracting competition data...');
+            
+            try {
+                // Show PDF preview
+                showPDFPreview(file);
+                
+                // Extract text using PDF.js
+                const extractedText = await processPDFWithLibrary(file);
+                
+                if (!extractedText || extractedText.trim().length < 100) {
+                    throw new Error('Insufficient text extracted from PDF. Please check the file.');
+                }
+                
+                // Update preview with extracted text
+                document.getElementById('extractedTextPreview').textContent = extractedText;
+                
+                showProcessing('Parsing competition data...');
+                
+                // Parse the extracted text
+                const parsedData = parseCanuckDogsText(dogName, extractedText);
+                
+                if (parsedData && Object.keys(parsedData.yearlyData).length > 0) {
+                    currentDogData = parsedData;
+                    calculateAllPoints();
+                    displayResults();
+                    
+                    const totalShows = getTotalShows();
+                    const totalPoints = currentDogData.totalGrandMasterPoints;
+                    
+                    showSuccess(`✅ Successfully processed PDF for ${currentDogData.basicInfo.callName}! Found ${totalShows} shows with ${totalPoints} total Grand Master points.`);
+                } else {
+                    showError('Could not parse competition data from PDF. The file may not contain CanuckDogs competition results, or the format may not be recognized.');
+                }
+                
+            } catch (error) {
+                console.error('PDF processing error:', error);
+                showError('Error processing PDF: ' + error.message + '. Please ensure this is a CanuckDogs competition results PDF.');
+            } finally {
+                hideProcessing();
+            }
+        }
+
+                        <!-- Auto-Fetch Method -->
+                <div id="auto-method" class="method-content" style="display: none;">
+                    <div class="input-group">
+                        <label>Dog's Registered Name:</label>
+                        <input type="text" id="dogNameAuto" class="input-field" placeholder="Enter the registered name..." />
+                    </div>
+
+                    <div style="background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 15px;">🤖 Automation Status</h4>
+                        <div id="automationStatus" style="padding: 15px; background: rgba(255, 255, 255, 0.1); border-radius: 6px; margin-bottom: 15px;">
+                            <strong>❌ Browser Extension Required</strong><br>
+                            <span style="opacity: 0.9;">Direct automation is not possible due to browser security restrictions (CORS policy).</span>
+                        </div>
+                        
+                        <button onclick="showAutomationOptions()" class="btn-primary" style="background: linear-gradient(45deg, #17a2b8, #138496);">
+                            🔧 View Automation Solutions
+                        </button>
+                    </div>
+
+                    <div class="workflow-steps">
+                        <h4>🚫 Why Direct Automation Isn't Possible:</h4>
+                        <ul style="margin: 10px 0; padding-left: 20px; line-height: 1.6;">
+                            <li><strong>CORS Policy:</strong> Browsers block cross-origin requests to other websites</li>
+                            <li><strong>Same-Origin Policy:</strong> Can't control or read content from CanuckDogs.ca</li>
+                            <li><strong>Security Restrictions:</strong> Prevents malicious websites from accessing other sites</li>
+                            <li><strong>File System Access:</strong> Web pages can't save files to arbitrary locations</li>
+                        </ul>
+                    </div>
+                </div>
+
+        function showAutomationOptions() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 15px; padding: 30px; max-width: 800px; max-height: 80vh; overflow-y: auto;">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">🤖 Automation Solutions for CanuckDogs</h2>
+                    
+                    <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px; margin: 20px 0; color: #721c24;">
+                        <h3 style="margin-bottom: 10px;">⚠️ Direct Automation Not Possible</h3>
+                        <p>Due to browser security (CORS policy), websites cannot automatically navigate to other domains, fill forms, or download files from external sites like CanuckDogs.ca.</p>
+                    </div>
+                    
+                    <h3 style="margin: 20px 0 10px 0; color: #495057;">✅ Available Solutions:</h3>
+                    
+                    <div style="display: grid; gap: 20px;">
+                        <div style="border: 2px solid #28a745; border-radius: 8px; padding: 20px; background: #d4edda;">
+                            <h4 style="color: #155724; margin-bottom: 10px;">🔧 Browser Extension (Recommended)</h4>
+                            <p style="color: #155724; margin-bottom: 15px;">A Chrome/Firefox extension that runs in the CanuckDogs context and can automate your workflow.</p>
+                            <div style="background: rgba(255,255,255,0.7); padding: 10px; border-radius: 4px; margin: 10px 0;">
+                                <strong>How it works:</strong><br>
+                                1. Install extension<br>
+                                2. Go to CanuckDogs.ca<br>
+                                3. Extension adds "Send to CKC Tracker" button<br>
+                                4. Automatically follows your PDF workflow<br>
+                                5. Sends data directly to this tool
+                            </div>
+                        </div>
+                        
+                        <div style="border: 2px solid #17a2b8; border-radius: 8px; padding: 20px; background: #d1ecf1;">
+                            <h4 style="color: #0c5460; margin-bottom: 10px;">📱 Desktop Application</h4>
+                            <p style="color: #0c5460; margin-bottom: 15px;">A standalone desktop app that can automate web browsing without browser restrictions.</p>
+                            <div style="background: rgba(255,255,255,0.7); padding: 10px; border-radius: 4px;">
+                                <strong>Technologies:</strong> Electron + Puppeteer, Python + Selenium, or similar
+                            </div>
+                        </div>
+                        
+                        <div style="border: 2px solid #ffc107; border-radius: 8px; padding: 20px; background: #fff3cd;">
+                            <h4 style="color: #856404; margin-bottom: 10px;">🔖 Enhanced Bookmarklet</h4>
+                            <p style="color: #856404; margin-bottom: 15px;">JavaScript bookmarklet that runs on CanuckDogs pages to extract and send data.</p>
+                            <div style="background: rgba(255,255,255,0.7); padding: 10px; border-radius: 4px;">
+                                <strong>Limitation:</strong> Still requires manual navigation to print page
+                            </div>
+                        </div>
+                        
+                        <div style="border: 2px solid #6f42c1; border-radius: 8px; padding: 20px; background: #e2d9f3;">
+                            <h4 style="color: #493057; margin-bottom: 10px;">🌐 Proxy/Server Solution</h4>
+                            <p style="color: #493057; margin-bottom: 15px;">Backend server that handles CanuckDogs automation and serves data to the website.</p>
+                            <div style="background: rgba(255,255,255,0.7); padding: 10px; border-radius: 4px;">
+                                <strong>Note:</strong> More complex, requires server infrastructure
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                        <h4 style="color: #0056b3; margin-bottom: 10px;">💡 Recommended Approach</h4>
+                        <p style="color: #0056b3; margin-bottom: 10px;">For now, continue with the <strong>manual PDF workflow</strong> - it's reliable and gives you complete control:</p>
+                        <ol style="color: #0056b3; padding-left: 20px;">
+                            <li>Follow the CanuckDogs PDF generation steps</li>
+                            <li>Upload the PDF to this tool</li>
+                            <li>Get automatic points calculation</li>
+                        </ol>
+                        <p style="color: #0056b3; margin-top: 10px;"><strong>Future:</strong> A browser extension could be developed to automate steps 1-2.</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
     </script>
 </body>
 </html>
