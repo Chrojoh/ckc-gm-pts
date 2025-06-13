@@ -500,19 +500,46 @@
             
             <!-- Tab Selection -->
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button onclick="showImportMethod('search')" id="searchTabBtn" class="search-btn" style="padding: 10px 20px; font-size: 0.9rem;">
-                    🔍 Search CanuckDogs
-                </button>
-                <button onclick="showImportMethod('paste')" id="pasteTabBtn" class="search-btn" style="padding: 10px 20px; font-size: 0.9rem; background: #6c757d;">
+                <button onclick="showImportMethod('paste')" id="pasteTabBtn" class="search-btn" style="padding: 10px 20px; font-size: 0.9rem; background: linear-gradient(45deg, #e74c3c, #c0392b);">
                     📋 Paste Data
+                </button>
+                <button onclick="showImportMethod('search')" id="searchTabBtn" class="search-btn" style="padding: 10px 20px; font-size: 0.9rem; background: #6c757d;">
+                    🔍 Search CanuckDogs
                 </button>
                 <button onclick="showImportMethod('bookmarklet')" id="bookmarkletTabBtn" class="search-btn" style="padding: 10px 20px; font-size: 0.9rem; background: #6c757d;">
                     🔖 Auto-Extract
                 </button>
             </div>
             
+            <!-- Paste Method - Make this the default -->
+            <div id="pasteMethod" class="import-method">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold; color: white;">Dog's Registered Name:</label>
+                    <input type="text" id="manualDogName" class="search-input" placeholder="Enter the registered name..." style="width: 100%; margin-bottom: 10px;" />
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold; color: white;">CanuckDogs Competition Data:</label>
+                    <textarea id="canuckDogsData" class="search-input" placeholder="Copy and paste ALL the competition results from the dog's CanuckDogs page here..." 
+                             style="width: 100%; height: 200px; font-family: monospace; font-size: 0.9rem; resize: vertical;"></textarea>
+                </div>
+                <button onclick="processManualData()" class="search-btn" style="width: 100%; padding: 15px; font-size: 1.1rem;">
+                    📊 Calculate Grand Master Points
+                </button>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <h4 style="margin-bottom: 10px;">📋 Step-by-Step Instructions:</h4>
+                    <ol style="margin: 0; padding-left: 20px; line-height: 1.8; color: rgba(255,255,255,0.9);">
+                        <li><strong>Go to CanuckDogs.com</strong> and find your dog's page</li>
+                        <li><strong>Select ALL text</strong> on the page (Ctrl+A or Cmd+A)</li>
+                        <li><strong>Copy the text</strong> (Ctrl+C or Cmd+C)</li>
+                        <li><strong>Paste it</strong> in the text area above (Ctrl+V or Cmd+V)</li>
+                        <li><strong>Enter the dog's name</strong> and click "Calculate Points"</li>
+                    </ol>
+                </div>
+            </div>
+            
             <!-- Search Method -->
-            <div id="searchMethod" class="import-method">
+            <div id="searchMethod" class="import-method" style="display: none;">
                 <div class="search-box">
                     <input type="text" id="dogName" class="search-input" placeholder="e.g., ROBEL MILLER TIME, SUNNYDALE GOLDEN..." />
                     <button onclick="searchCanuckDogs()" id="searchBtn" class="search-btn">🔍 Search CanuckDogs</button>
@@ -525,30 +552,6 @@
                         <li><strong>Do not include titles</strong> - no "CH", "GCH", "AM CH" prefixes</li>
                         <li><strong>Use only the registered name</strong> - no prefixes or suffixes</li>
                     </ul>
-                </div>
-            </div>
-            
-            <!-- Paste Method -->
-            <div id="pasteMethod" class="import-method" style="display: none;">
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Dog's Registered Name:</label>
-                    <input type="text" id="manualDogName" class="search-input" placeholder="Enter the registered name..." style="width: 100%; margin-bottom: 10px;" />
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">CanuckDogs Competition Data:</label>
-                    <textarea id="canuckDogsData" class="search-input" placeholder="Copy and paste the competition results from the dog's CanuckDogs page..." 
-                             style="width: 100%; height: 200px; font-family: monospace; font-size: 0.9rem; resize: vertical;"></textarea>
-                </div>
-                <button onclick="processManualData()" class="search-btn">📊 Calculate Points</button>
-                
-                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-top: 15px;">
-                    <h4 style="margin-bottom: 10px;">📋 How to Copy Data from CanuckDogs:</h4>
-                    <ol style="margin: 0; padding-left: 20px; line-height: 1.6;">
-                        <li>Go to your dog's CanuckDogs page</li>
-                        <li>Select and copy all the competition results text</li>
-                        <li>Paste it into the text area above</li>
-                        <li>Click "Calculate Points" to process the data</li>
-                    </ol>
                 </div>
             </div>
             
@@ -701,7 +704,7 @@
         let selectedYear = null;
         let searchResults = [];
 
-        // Import method switching
+        // Import method switching - default to paste method
         function showImportMethod(method) {
             // Hide all methods
             document.querySelectorAll('.import-method').forEach(div => {
@@ -717,6 +720,28 @@
             document.getElementById(method + 'Method').style.display = 'block';
             document.getElementById(method + 'TabBtn').style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
         }
+
+        // Initialize with paste method active
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set paste as default method
+            showImportMethod('paste');
+            
+            // Focus on the dog name input
+            document.getElementById('manualDogName').focus();
+            
+            // Add keyboard shortcuts
+            document.getElementById('manualDogName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('canuckDogsData').focus();
+                }
+            });
+            
+            document.getElementById('canuckDogsData').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    processManualData();
+                }
+            });
+        });
 
         // Manual data processing
         async function processManualData() {
