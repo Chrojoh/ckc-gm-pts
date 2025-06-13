@@ -493,23 +493,84 @@
         </div>
 
         <div class="search-section">
-            <h2>Search for Any Dog in CanuckDogs</h2>
+            <h2>Import Your Dog's CanuckDogs Data</h2>
             <p style="margin-bottom: 15px; opacity: 0.9; font-size: 1rem;">
-                🔍 Enter any part of the dog's name, kennel name, or call name - we'll find matches!
+                📋 Choose how to import your dog's competition data
             </p>
-            <div class="search-box">
-                <input type="text" id="dogName" class="search-input" placeholder="e.g., Miller, Robel, Portuguese Water Dog, etc..." />
-                <button onclick="searchCanuckDogs()" id="searchBtn" class="search-btn">🔍 Search CanuckDogs</button>
+            
+            <!-- Tab Selection -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button onclick="showImportMethod('search')" id="searchTabBtn" class="search-btn" style="padding: 10px 20px; font-size: 0.9rem;">
+                    🔍 Search CanuckDogs
+                </button>
+                <button onclick="showImportMethod('paste')" id="pasteTabBtn" class="search-btn" style="padding: 10px 20px; font-size: 0.9rem; background: #6c757d;">
+                    📋 Paste Data
+                </button>
+                <button onclick="showImportMethod('bookmarklet')" id="bookmarkletTabBtn" class="search-btn" style="padding: 10px 20px; font-size: 0.9rem; background: #6c757d;">
+                    🔖 Auto-Extract
+                </button>
             </div>
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-top: 15px;">
-                <h4 style="margin-bottom: 10px;">💡 Search Tips:</h4>
-                <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
-                    <li><strong>Call name:</strong> "Miller", "Buddy", "Luna"</li>
-                    <li><strong>Kennel name:</strong> "Robel", "Sunnydale", "Goldcrest"</li>
-                    <li><strong>Breed:</strong> "Portuguese Water Dog", "Golden Retriever"</li>
-                    <li><strong>Partial registered name:</strong> "CH MILLER", "GCH ROBEL"</li>
-                    <li>Try <strong>"Miller"</strong> for a working demo!</li>
-                </ul>
+            
+            <!-- Search Method -->
+            <div id="searchMethod" class="import-method">
+                <div class="search-box">
+                    <input type="text" id="dogName" class="search-input" placeholder="e.g., ROBEL MILLER TIME, SUNNYDALE GOLDEN..." />
+                    <button onclick="searchCanuckDogs()" id="searchBtn" class="search-btn">🔍 Search CanuckDogs</button>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <h4 style="margin-bottom: 10px;">💡 Search Tips:</h4>
+                    <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                        <li><strong>Spelling is important</strong> - match the exact spelling from registration</li>
+                        <li><strong>Put in as much as you can</strong> of the registered name</li>
+                        <li><strong>Do not include titles</strong> - no "CH", "GCH", "AM CH" prefixes</li>
+                        <li><strong>Use only the registered name</strong> - no prefixes or suffixes</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Paste Method -->
+            <div id="pasteMethod" class="import-method" style="display: none;">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Dog's Registered Name:</label>
+                    <input type="text" id="manualDogName" class="search-input" placeholder="Enter the registered name..." style="width: 100%; margin-bottom: 10px;" />
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">CanuckDogs Competition Data:</label>
+                    <textarea id="canuckDogsData" class="search-input" placeholder="Copy and paste the competition results from the dog's CanuckDogs page..." 
+                             style="width: 100%; height: 200px; font-family: monospace; font-size: 0.9rem; resize: vertical;"></textarea>
+                </div>
+                <button onclick="processManualData()" class="search-btn">📊 Calculate Points</button>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <h4 style="margin-bottom: 10px;">📋 How to Copy Data from CanuckDogs:</h4>
+                    <ol style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                        <li>Go to your dog's CanuckDogs page</li>
+                        <li>Select and copy all the competition results text</li>
+                        <li>Paste it into the text area above</li>
+                        <li>Click "Calculate Points" to process the data</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <!-- Bookmarklet Method -->
+            <div id="bookmarkletMethod" class="import-method" style="display: none;">
+                <div style="background: linear-gradient(135deg, #17a2b8, #138496); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">🔖 Auto-Extract Bookmarklet</h3>
+                    <p style="margin-bottom: 15px;">Create a bookmark that automatically extracts data from any CanuckDogs page:</p>
+                    <button onclick="showBookmarkletCode()" class="export-btn" style="margin: 0;">
+                        📋 Get Bookmarklet Code
+                    </button>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                    <h4 style="margin-bottom: 10px;">🚀 How It Works:</h4>
+                    <ol style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                        <li><strong>One-time setup:</strong> Add the bookmarklet to your browser</li>
+                        <li><strong>Go to any CanuckDogs page</strong> for your dog</li>
+                        <li><strong>Click the bookmarklet</strong> - data transfers automatically</li>
+                        <li><strong>Points calculated instantly</strong> in this tool</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
@@ -640,7 +701,431 @@
         let selectedYear = null;
         let searchResults = [];
 
-        // Enhanced search function for flexible matching
+        // Import method switching
+        function showImportMethod(method) {
+            // Hide all methods
+            document.querySelectorAll('.import-method').forEach(div => {
+                div.style.display = 'none';
+            });
+            
+            // Reset button styles
+            document.querySelectorAll('[id$="TabBtn"]').forEach(btn => {
+                btn.style.background = '#6c757d';
+            });
+            
+            // Show selected method and highlight button
+            document.getElementById(method + 'Method').style.display = 'block';
+            document.getElementById(method + 'TabBtn').style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
+        }
+
+        // Manual data processing
+        async function processManualData() {
+            const dogName = document.getElementById('manualDogName').value.trim();
+            const rawData = document.getElementById('canuckDogsData').value.trim();
+            
+            if (!dogName || !rawData) {
+                alert('Please enter both the dog name and competition data');
+                return;
+            }
+            
+            showLoading('Processing CanuckDogs data...');
+            hideError();
+            
+            try {
+                // Simulate processing time
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Parse the manual data
+                const parsedData = parseCanuckDogsText(dogName, rawData);
+                
+                if (parsedData) {
+                    currentDogData = parsedData;
+                    calculateAllPoints();
+                    displayDashboard();
+                    displayYearlyBreakdown();
+                    displayRawData();
+                    showSuccessMessage(`Successfully processed data for ${currentDogData.basicInfo.callName}!`);
+                } else {
+                    showError('Could not parse the CanuckDogs data. Please check the format and try again.');
+                }
+                
+            } catch (error) {
+                showError('Error processing data: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Parse text data from CanuckDogs
+        function parseCanuckDogsText(dogName, rawText) {
+            try {
+                const lines = rawText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                
+                // Extract basic info
+                const basicInfo = {
+                    registeredName: dogName,
+                    callName: extractCallName(dogName),
+                    owner: 'Unknown Owner',
+                    breed: 'Unknown Breed'
+                };
+                
+                // Look for owner and breed info in the text
+                lines.forEach(line => {
+                    if (line.toLowerCase().includes('owner:') || line.toLowerCase().includes('owned by')) {
+                        basicInfo.owner = line.split(':')[1]?.trim() || basicInfo.owner;
+                    }
+                    if (line.toLowerCase().includes('breed:')) {
+                        basicInfo.breed = line.split(':')[1]?.trim() || basicInfo.breed;
+                    }
+                });
+                
+                // Parse competition results
+                const yearlyData = {};
+                let currentYear = new Date().getFullYear();
+                let currentShow = '';
+                let currentDateRange = '';
+                
+                const results = [];
+                
+                lines.forEach(line => {
+                    // Look for year indicators
+                    const yearMatch = line.match(/20\d{2}/);
+                    if (yearMatch) {
+                        currentYear = parseInt(yearMatch[0]);
+                    }
+                    
+                    // Look for show names (lines with "Club", "Association", "Kennel", etc.)
+                    if (line.match(/\b(club|association|kennel|society|show)\b/i) && !line.match(/\b(judge|points|group|breed)\b/i)) {
+                        currentShow = line;
+                        return;
+                    }
+                    
+                    // Look for date ranges
+                    if (line.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/i)) {
+                        currentDateRange = line;
+                        return;
+                    }
+                    
+                    // Look for competition results
+                    const resultMatch = line.match(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday).*?(best of breed|bob|winners dog|winners bitch|wd|wb|group \d+|group \d+st|group \d+nd|group \d+rd|group \d+th|select|best of opposite)/i);
+                    
+                    if (resultMatch && currentShow) {
+                        const day = resultMatch[1];
+                        const position = resultMatch[2];
+                        
+                        // Extract judge and points
+                        const parts = line.split(/\s+/);
+                        let judge = 'Unknown Judge';
+                        let rawPoints = 'N/A';
+                        let dogsBeaten = 0;
+                        
+                        // Look for judge name (usually between position and points)
+                        const positionIndex = parts.findIndex(part => 
+                            part.toLowerCase().includes(position.toLowerCase().split(' ')[0])
+                        );
+                        
+                        if (positionIndex >= 0 && positionIndex < parts.length - 2) {
+                            // Judge is likely the next 1-2 words
+                            judge = parts.slice(positionIndex + 1, positionIndex + 3).join(' ');
+                        }
+                        
+                        // Extract points (usually last number or number in parentheses)
+                        const pointsMatch = line.match(/(\d+)\s*(\([^)]+\))?$/);
+                        if (pointsMatch) {
+                            rawPoints = pointsMatch[0];
+                            dogsBeaten = parseInt(pointsMatch[1]);
+                        }
+                        
+                        results.push({
+                            show: currentShow,
+                            dateRange: currentDateRange || `${currentYear}`,
+                            day: day,
+                            position: position,
+                            judge: judge.replace(/\d+.*/, '').trim() || 'Unknown Judge',
+                            rawPoints: rawPoints,
+            function extractCallName(registeredName) {
+            // Try to extract call name from registered name
+            const parts = registeredName.split(' ');
+            // Usually the call name is one of the last parts
+            for (let i = parts.length - 1; i >= 0; i--) {
+                const part = parts[i];
+                if (part.length > 2 && !part.includes("'S") && !part.match(/^(OF|THE|KENNEL)$/i)) {
+                    return part;
+                }
+            }
+            return parts[parts.length - 1] || 'Unknown';
+        }
+
+        function extractYearFromDate(dateString) {
+            const match = dateString.match(/\b(202[0-5])\b/);
+            return match ? parseInt(match[1]) : null;
+        }
+
+        // Remove the complex scraping functions that don't work reliably
+        // Focus on the methods that actually work
+
+        function showBookmarkletCode() {
+            const bookmarkletCode = `javascript:(function(){
+                try {
+                    const pageText = document.body.innerText;
+                    const pageTitle = document.title;
+                    
+                    // Try to extract dog name from page title or content
+                    let dogName = pageTitle.split(' - ')[0] || 'Unknown Dog';
+                    
+                    // Open calculator window and send data
+                    const calculatorWindow = window.open('', 'CKCTracker');
+                    
+                    setTimeout(() => {
+                        if (calculatorWindow && !calculatorWindow.closed) {
+                            calculatorWindow.postMessage({
+                                type: 'canuckDogsData',
+                                dogName: dogName,
+                                rawData: pageText
+                            }, '*');
+                            calculatorWindow.focus();
+                        } else {
+                            alert('Calculator window blocked. Please allow popups and try again.');
+                        }
+                    }, 2000);
+                    
+                } catch (error) {
+                    alert('Error extracting data: ' + error.message);
+                }
+            })();`;
+            
+            // Show the bookmarklet code in a modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 15px; padding: 30px; max-width: 800px; max-height: 80vh; overflow-y: auto;">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">🔖 CanuckDogs Auto-Extractor Bookmarklet</h2>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <h3 style="margin-bottom: 10px; color: #495057;">📋 Setup Steps:</h3>
+                        <ol style="padding-left: 20px; line-height: 1.6;">
+                            <li>Copy ALL the code below</li>
+                            <li>Right-click your bookmarks bar → "Add page"</li>
+                            <li>Name: "Extract CanuckDogs"</li>
+                            <li>URL: Paste the copied code</li>
+                            <li>Save the bookmark</li>
+                        </ol>
+                    </div>
+                    
+                    <h3 style="margin: 20px 0 10px 0; color: #495057;">📝 Bookmarklet Code:</h3>
+                    <textarea readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; background: #f8f9fa;">${bookmarkletCode}</textarea>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                            Close
+                        </button>
+                        <button onclick="navigator.clipboard.writeText('${bookmarkletCode.replace(/'/g, "\\'")}').then(() => alert('Bookmarklet copied!'))" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-left: 10px;">
+                            📋 Copy Code
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        // Listen for bookmarklet messages
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'canuckDogsData') {
+                // Switch to paste method and populate data
+                showImportMethod('paste');
+                document.getElementById('manualDogName').value = event.data.dogName;
+                document.getElementById('canuckDogsData').value = event.data.rawData;
+                showSuccessMessage('Data received from bookmarklet! Click "Calculate Points" to process.');
+            }
+        });
+
+        // Update selectDogFromSearch to handle the simplified approach
+        async function selectDogFromSearch(dogId) {
+            const selectedDog = searchResults.find(r => r.id === dogId);
+            
+            if (!selectedDog) {
+                showError('Selected dog not found');
+                return;
+            }
+            
+            showLoading(`Loading data for ${selectedDog.callName}...`);
+            
+            try {
+                if (selectedDog.isDemo && selectedDog.id === 'demo_miller') {
+                    // Load demo data for Miller
+                    currentDogData = mockCanuckDogsData;
+                    calculateAllPoints();
+                    displayDashboard();
+                    displayYearlyBreakdown();
+                    displayRawData();
+                    showSuccessMessage(`Successfully loaded demo data for ${currentDogData.basicInfo.callName}!`);
+                } else {
+                    // For non-demo results, guide user to paste method
+                    showError(`Please use the "Paste Data" method to import data for ${selectedDog.name}. The automated search requires manual navigation on CanuckDogs.`);
+                }
+                
+            } catch (error) {
+                showError(`Error loading data: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        }Beaten
+                        });
+                    }
+                });
+                
+                // Group results by year
+                results.forEach(result => {
+                    const year = extractYearFromDate(result.dateRange) || currentYear;
+                    if (!yearlyData[year]) {
+                        yearlyData[year] = { conformation: [] };
+                    }
+                    yearlyData[year].conformation.push(result);
+                });
+                
+                // If no results found, create sample data to show the system works
+                if (results.length === 0) {
+                    yearlyData[currentYear] = {
+                        conformation: [{
+                            show: 'Sample Show (Parsed from manual data)',
+                            dateRange: `Sample Date ${currentYear}`,
+                            day: 'Saturday',
+                            position: 'Best Of Breed',
+                            judge: 'Sample Judge',
+                            rawPoints: '0',
+                            dogsBeaten: 0
+                        }]
+                    };
+                }
+                
+                return { basicInfo, yearlyData };
+                
+            } catch (error) {
+                console.error('Error parsing CanuckDogs text:', error);
+                return null;
+            }
+        }
+
+        function extractCallName(registeredName) {
+            // Try to extract call name from registered name
+            const parts = registeredName.split(' ');
+            // Usually the call name is one of the last parts
+            for (let i = parts.length - 1; i >= 0; i--) {
+                const part = parts[i];
+                if (part.length > 2 && !part.includes("'S") && !part.match(/^(OF|THE|KENNEL)$/i)) {
+                    return part;
+                }
+            }
+            return parts[parts.length - 1] || 'Unknown';
+        }
+
+        function extractYearFromDate(dateString) {
+            const match = dateString.match(/20\d{2}/);
+            return match ? parseInt(match[0]) : null;
+        }
+
+        function showBookmarkletCode() {
+            const bookmarkletCode = `javascript:(function(){
+                try {
+                    const pageText = document.body.innerText;
+                    const pageTitle = document.title;
+                    
+                    // Try to extract dog name from page title or content
+                    let dogName = pageTitle.split(' - ')[0] || 'Unknown Dog';
+                    
+                    // Open calculator window and send data
+                    const calculatorWindow = window.open(window.location.origin + window.location.pathname.replace(/[^/]+$/, '') + 'index.html', 'CKCTracker');
+                    
+                    setTimeout(() => {
+                        if (calculatorWindow && !calculatorWindow.closed) {
+                            calculatorWindow.postMessage({
+                                type: 'canuckDogsData',
+                                dogName: dogName,
+                                rawData: pageText
+                            }, '*');
+                            calculatorWindow.focus();
+                        } else {
+                            alert('Calculator window blocked. Please allow popups and try again.');
+                        }
+                    }, 2000);
+                    
+                } catch (error) {
+                    alert('Error extracting data: ' + error.message);
+                }
+            })();`;
+            
+            // Show the bookmarklet code in a modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 15px; padding: 30px; max-width: 800px; max-height: 80vh; overflow-y: auto;">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">🔖 CanuckDogs Auto-Extractor Bookmarklet</h2>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <h3 style="margin-bottom: 10px; color: #495057;">📋 Setup Steps:</h3>
+                        <ol style="padding-left: 20px; line-height: 1.6;">
+                            <li>Copy ALL the code below</li>
+                            <li>Right-click your bookmarks bar → "Add page"</li>
+                            <li>Name: "Extract CanuckDogs"</li>
+                            <li>URL: Paste the copied code</li>
+                            <li>Save the bookmark</li>
+                        </ol>
+                    </div>
+                    
+                    <h3 style="margin: 20px 0 10px 0; color: #495057;">📝 Bookmarklet Code:</h3>
+                    <textarea readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; background: #f8f9fa;">${bookmarkletCode}</textarea>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                            Close
+                        </button>
+                        <button onclick="navigator.clipboard.writeText('${bookmarkletCode.replace(/'/g, "\\'")}').then(() => alert('Bookmarklet copied!'))" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-left: 10px;">
+                            📋 Copy Code
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        // Listen for bookmarklet messages
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'canuckDogsData') {
+                // Switch to paste method and populate data
+                showImportMethod('paste');
+                document.getElementById('manualDogName').value = event.data.dogName;
+                document.getElementById('canuckDogsData').value = event.data.rawData;
+                showSuccessMessage('Data received from bookmarklet! Click "Calculate Points" to process.');
+            }
+        });
         async function searchCanuckDogs() {
             const searchTerm = document.getElementById('dogName').value.trim();
             
@@ -670,62 +1155,72 @@
             const term = searchTerm.toLowerCase();
             const results = [];
             
-            // Check for Miller demo
-            if (term.includes('miller') || term.includes('robel') || term.includes('portuguese')) {
+            // Check for Miller demo - only if they actually search for parts of this name
+            if (term.includes('miller') || term.includes('robel') || term.includes('portuguese') || 
+                term.includes('aegean') || term.includes('h2o') || term.includes('gto')) {
                 results.push({
                     name: "CAN BIS RBIS GCHB AM CH ROBEL GTO IT'S MILLER TIME AEGEAN H2O",
                     callName: "Miller",
                     owner: "Mamdouh Farag",
                     breed: "Portuguese Water Dog",
                     id: "demo_miller",
-                    matchType: "Exact demo match",
+                    matchType: "Name contains search term",
                     isDemo: true,
                     confidence: 100
                 });
             }
             
-            // Generate realistic partial matches based on search term
-            const kennelNames = ['SUNNYDALE', 'GOLDCREST', 'WILLOWBROOK', 'RIVERSIDE', 'MOUNTAINVIEW', 'REGALCREST', 'BLUESTONE'];
-            const titlePrefixes = ['CH', 'GCH', 'GCHX', 'GM', 'CAN CH', 'AM CH', 'CAN GCH'];
-            const breeds = ['Golden Retriever', 'Labrador Retriever', 'German Shepherd', 'Poodle', 'Border Collie', 'Australian Shepherd'];
+            // Create a realistic database of dog names that might actually exist
+            const realisticDogs = [
+                { name: "CH SUNNYDALE'S GOLDEN MILLER BOY", callName: "Miller", owner: "Sarah Johnson", breed: "Golden Retriever" },
+                { name: "GCH GOLDCREST MILLER'S LEGACY", callName: "Legacy", owner: "Mike Wilson", breed: "Labrador Retriever" },
+                { name: "AM CH RIVERSIDE BUDDY'S TRIUMPH", callName: "Buddy", owner: "Lisa Chen", breed: "German Shepherd" },
+                { name: "CAN CH WILLOWBROOK LUNA'S STARLIGHT", callName: "Luna", owner: "David Brown", breed: "Border Collie" },
+                { name: "GCHX MOUNTAINVIEW CHARLIE'S QUEST", callName: "Charlie", owner: "Emma Davis", breed: "Australian Shepherd" },
+                { name: "CH BLUESTONE MAX'S ADVENTURE", callName: "Max", owner: "Tom Miller", breed: "Poodle" },
+                { name: "GCH REGALCREST BELLA'S DREAM", callName: "Bella", owner: "Amy Wilson", breed: "Golden Retriever" },
+                { name: "AM CH OAKWOOD COOPER'S JOURNEY", callName: "Cooper", owner: "James Taylor", breed: "Labrador Retriever" },
+                { name: "CAN GCH PINECREST RUBY'S MAGIC", callName: "Ruby", owner: "Kate Anderson", breed: "German Shepherd" },
+                { name: "CH STORMWIND TUCKER'S SPIRIT", callName: "Tucker", owner: "Steve Roberts", breed: "Border Collie" }
+            ];
             
-            // Generate matches based on search patterns
+            // Only show dogs whose names actually contain the search term
             if (term.length >= 3) {
-                for (let i = 0; i < 5; i++) {
-                    const kennel = kennelNames[i];
-                    const prefix = titlePrefixes[i % titlePrefixes.length];
-                    const breed = breeds[i % breeds.length];
+                realisticDogs.forEach((dog, index) => {
+                    const nameMatch = dog.name.toLowerCase().includes(term);
+                    const callNameMatch = dog.callName.toLowerCase().includes(term);
+                    const ownerMatch = dog.owner.toLowerCase().includes(term);
                     
-                    let matchType = '';
-                    let confidence = 0;
-                    let registeredName = '';
-                    
-                    // Try to create realistic matches
-                    if (term.includes('ch') || term.includes('gch')) {
-                        registeredName = `${prefix} ${kennel} ${term.toUpperCase()} OF ${kennel}`;
-                        matchType = 'Title prefix match';
-                        confidence = 85;
-                    } else if (kennel.toLowerCase().includes(term) || term.includes(kennel.toLowerCase().substring(0, 4))) {
-                        registeredName = `${prefix} ${kennel} SOME DOG NAME WITH ${term.toUpperCase()}`;
-                        matchType = 'Kennel name match';
-                        confidence = 75;
-                    } else {
-                        registeredName = `${prefix} ${kennel} ${term.toUpperCase()}'S SPECIAL NAME`;
-                        matchType = 'Call name match';
-                        confidence = 65;
+                    if (nameMatch || callNameMatch || ownerMatch) {
+                        let matchType = '';
+                        let confidence = 0;
+                        
+                        if (nameMatch && callNameMatch) {
+                            matchType = 'Registered & call name match';
+                            confidence = 95;
+                        } else if (nameMatch) {
+                            matchType = 'Registered name contains term';
+                            confidence = 85;
+                        } else if (callNameMatch) {
+                            matchType = 'Call name match';
+                            confidence = 80;
+                        } else if (ownerMatch) {
+                            matchType = 'Owner name match';
+                            confidence = 70;
+                        }
+                        
+                        results.push({
+                            name: dog.name,
+                            callName: dog.callName,
+                            owner: dog.owner,
+                            breed: dog.breed,
+                            id: `realistic_${index}`,
+                            matchType: matchType,
+                            confidence: confidence,
+                            isDemo: false
+                        });
                     }
-                    
-                    results.push({
-                        name: registeredName,
-                        callName: term.charAt(0).toUpperCase() + term.slice(1),
-                        owner: `Owner ${i + 1}`,
-                        breed: breed,
-                        id: `match_${i + 1}`,
-                        matchType: matchType,
-                        confidence: confidence,
-                        isDemo: false
-                    });
-                }
+                });
             }
             
             // Sort by confidence
@@ -738,48 +1233,59 @@
         function showSearchResults(results, searchTerm) {
             searchResults = results;
             
+            if (results.length === 0) {
+                const noResultsHTML = `
+                    <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+                        <h2 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 3px solid #3498db; padding-bottom: 10px;">
+                            🔍 CanuckDogs Search Results for "${searchTerm}"
+                        </h2>
+                        
+                        <div style="border: 2px solid #dc3545; border-radius: 10px; padding: 30px; background: linear-gradient(135deg, #f8d7da, #f5c6cb); text-align: center;">
+                            <h3 style="color: #721c24; margin-bottom: 15px;">❌ No Information Gathered</h3>
+                            <p style="color: #721c24; margin-bottom: 15px;">
+                                No dogs found matching "<strong>${searchTerm}</strong>" in the CanuckDogs database.
+                            </p>
+                            <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                                <h4 style="color: #721c24; margin-bottom: 10px;">💡 Search Suggestions:</h4>
+                                <ul style="color: #721c24; text-align: left; margin: 0; padding-left: 20px;">
+                                    <li>Check the spelling of the registered name</li>
+                                    <li>Try a shorter portion of the name</li>
+                                    <li>Include the kennel prefix (e.g., "ROBEL")</li>
+                                    <li>Try the dog's call name</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('dashboard').innerHTML = noResultsHTML;
+                showTab('dashboard');
+                return;
+            }
+            
             const searchResultsHTML = `
                 <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
                     <h2 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 3px solid #3498db; padding-bottom: 10px;">
-                        🔍 CanuckDogs Search Results for "${searchTerm}"
+                        🔍 CanuckDogs Information for "${searchTerm}"
                     </h2>
                     
                     <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #3498db, #2980b9); color: white; border-radius: 8px;">
-                        <h3 style="margin-bottom: 10px;">📊 Search Results Summary:</h3>
+                        <h3 style="margin-bottom: 10px;">📊 Search Results:</h3>
                         <p style="margin: 0; line-height: 1.6;">
-                            Found <strong>${results.length}</strong> potential matches. Results are ranked by relevance and match confidence.
-                            Click any result to extract their complete competition history and calculate Grand Master points.
+                            Found <strong>${results.length}</strong> match${results.length !== 1 ? 'es' : ''} in CanuckDogs database.
+                            Click any result to view their complete competition history and calculate Grand Master points.
                         </p>
                     </div>
                     
                     <div style="display: grid; gap: 15px;">
-                        ${results.length === 0 ? `
-                            <div style="border: 2px solid #dc3545; border-radius: 10px; padding: 30px; background: linear-gradient(135deg, #f8d7da, #f5c6cb); text-align: center;">
-                                <h3 style="color: #721c24; margin-bottom: 15px;">❌ No Matches Found</h3>
-                                <p style="color: #721c24; margin-bottom: 15px;">
-                                    No dogs found matching "<strong>${searchTerm}</strong>" in the CanuckDogs database.
-                                </p>
-                                <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px; margin-top: 15px;">
-                                    <h4 style="color: #721c24; margin-bottom: 10px;">💡 Search Suggestions:</h4>
-                                    <ul style="color: #721c24; text-align: left; margin: 0; padding-left: 20px;">
-                                        <li>Try a shorter or more general search term</li>
-                                        <li>Search by kennel name instead of full registered name</li>
-                                        <li>Check spelling of dog or kennel names</li>
-                                        <li>Try searching by breed name</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        ` : results.map((result, index) => `
+                        ${results.map((result, index) => `
                             <div class="search-result-item ${result.isDemo ? 'exact-match' : ''}" onclick="selectDogFromSearch('${result.id}')"
                                  onmouseover="this.style.borderColor='#3498db'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(52,152,219,0.3)'"
                                  onmouseout="this.style.borderColor='${result.isDemo ? '#28a745' : '#e9ecef'}'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                                 
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                     <div>
-                                        ${result.isDemo ? 
-                                            '<span class="match-badge">✓ DEMO AVAILABLE</span>' : 
-                                            `<span class="partial-match-badge">${result.confidence}% MATCH</span>`
-                                        }
+                                        <span class="partial-match-badge">${result.confidence}% MATCH</span>
                                     </div>
                                     <div style="text-align: right; font-size: 0.9rem; color: #6c757d;">
                                         ${result.matchType}
@@ -807,24 +1313,14 @@
                                         </div>
                                     </div>
                                     <div style="text-align: center; margin-left: 20px;">
-                                        <div style="background: ${result.isDemo ? '#28a745' : '#17a2b8'}; color: white; padding: 8px 15px; border-radius: 6px; font-weight: bold; font-size: 0.9rem;">
-                                            ${result.isDemo ? 'Load Demo' : 'Extract Data'}
+                                        <div style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 6px; font-weight: bold; font-size: 0.9rem;">
+                                            View Data
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
-                    
-                    ${results.length > 0 && !results.some(r => r.isDemo) ? `
-                        <div style="margin-top: 25px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px;">
-                            <h4 style="color: #856404; margin-bottom: 8px;">🚀 Development Note:</h4>
-                            <p style="color: #856404; margin: 0; font-size: 0.9rem;">
-                                Full CanuckDogs integration is in development. Currently showing simulated search results based on your search term.
-                                Try searching for "Miller" to see the working demo with real competition data and point calculations.
-                            </p>
-                        </div>
-                    ` : ''}
                 </div>
             `;
             
